@@ -1,8 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
-int yylineno = 1;
+#include "../parser/parser.tab.h"
 %}
 
 %%

@@ -4,9 +4,25 @@
 
 int yylex(void);
 void yyerror(const char *s);
+
+typedef struct {
+    double number;
+    char *string;
+    char *identifier;
+    int boolean;
+} yystype;
+
+#define YYSTYPE yystype
 %}
 
-%token NUM PLUS MINUS TIMES DIVIDE LPAREN RPAREN
+%token AND CLASS ELSE FALSE FOR FUN IF NIL OR PRINT RETURN SUPER THIS TRUE VAR WHILE
+%token EQUAL_EQUAL EQUAL BANG_EQUAL BANG LESS_EQUAL LESS GREATER_EQUAL GREATER
+%token LPAREN RPAREN LBRACE RBRACE COMMA DOT MINUS PLUS SEMICOLON STAR SLASH
+%token NUM STRING IDENTIFIER
+
+
+%left PLUS MINUS
+%left TIMES DIVIDE
 
 %%
 
