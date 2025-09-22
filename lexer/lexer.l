@@ -59,6 +59,10 @@
                                   free(str);
                                }
 
+[0-9]+[a-zA-Z_][a-zA-Z0-9_]*          { 
+                                  { printf("Identificador inválido: '%s'\n", yytext); }
+                               }
+                               
 [a-zA-Z_][a-zA-Z0-9_]*          { 
                                   printf("IDENTIFIER(%s)\n", yytext);
                                }
