@@ -1,3 +1,3 @@
-int yywrap() { //retirar isso, só funciona em mac
+int yywrap() { 
     return 1;
 }
