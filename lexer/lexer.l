@@ -60,13 +60,13 @@
                                }
 
 [0-9]+[a-zA-Z_][a-zA-Z0-9_]*          { 
-                                  { printf("Identificador inválido: '%s'\n", yytext); }
+                                  { printf("Identificador invalido: '%s'\n", yytext); }
                                }
                                
 [a-zA-Z_][a-zA-Z0-9_]*          { 
                                   printf("IDENTIFIER(%s)\n", yytext);
                                }
 
-.                               { printf("Caractere inválido: '%s'\n", yytext); }
+.                               { printf("Caractere invalido: '%s'\n", yytext); }
 
 %%
