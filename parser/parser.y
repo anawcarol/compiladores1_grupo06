@@ -9,7 +9,7 @@ void yyerror(const char *s);
 
 %define parse.error verbose
 
-%token AND CLASS ELSE FALSE FOR FUN IF NIL OR PRINT RETURN SUPER THIS TRUE VAR WHILE
+%token AND OR CLASS ELSE FALSE FOR FUN IF NIL OR PRINT RETURN SUPER THIS TRUE VAR WHILE
 %token EQUAL_EQUAL EQUAL BANG_EQUAL BANG LESS_EQUAL LESS GREATER_EQUAL GREATER
 %token LPAREN RPAREN LBRACE RBRACE COMMA DOT MINUS PLUS SEMICOLON STAR SLASH
 %token NUM STRING IDENTIFIER
@@ -18,11 +18,13 @@ void yyerror(const char *s);
     double number;
     char* string;
     char* identifier;
+    int boolean;
 }
 
 %type <number> expression term factor
 %type <identifier> IDENTIFIER
 %type <string> STRING
+%type <boolean> BOOL_EXPR
 
 %start program
 
@@ -70,6 +72,8 @@ expression:
     | expression MINUS term
     | expression STAR term
     | expression SLASH term
+    | expression AND expression   /* operador lógico AND */
+    | expression OR expression    /* operador lógico OR */
     | term
 ;
 
@@ -77,6 +81,8 @@ term:
       NUM
     | IDENTIFIER
     | STRING
+    | TRUE                         { $$ = 1; }   /* valor booleano verdadeiro */
+    | FALSE                        { $$ = 0; }   /* valor booleano falso */
     | LPAREN expression RPAREN
     | comparison
 ;
