@@ -5,6 +5,7 @@
 
 int yylex(void);
 void yyerror(const char *s);
+extern int yylineno;
 %}
 
 %define parse.error verbose
@@ -121,5 +122,5 @@ factor:
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro sintatico: %s\n", s);
+    fprintf(stderr, "Erro sintatico na linha %d: %s\n", yylineno, s);
 }
