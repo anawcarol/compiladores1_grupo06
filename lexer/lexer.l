@@ -62,7 +62,7 @@
                                 }
 
 [0-9]+[a-zA-Z_][a-zA-Z0-9_]*    { 
-                                    fprintf(stderr, "Identificador inválido na linha %d: '%s'\n", yylineno, yytext);
+                                    fprintf(stderr, "Identificador invalido na linha %d: '%s'\n", yylineno, yytext);
                                 }
 
 [a-zA-Z_][a-zA-Z0-9_]*          { 
@@ -71,7 +71,7 @@
                                 }
 
 .                               { 
-                                    fprintf(stderr, "Caractere inválido na linha %d: '%s'\n", yylineno, yytext);
+                                    fprintf(stderr, "Caractere invalido na linha %d: '%s'\n", yylineno, yytext);
                                 }
 
 %%
