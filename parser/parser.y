@@ -68,32 +68,54 @@ expr_stmt:
 ;
 
 expression:
-      expression PLUS term
-    | expression MINUS term
-    | expression STAR term
-    | expression SLASH term
-    | expression AND expression   /* operador lógico AND */
-    | expression OR expression    /* operador lógico OR */
-    | term
+      logic_or
 ;
 
-term:
+logic_or:
+      logic_and
+    | logic_or OR logic_and
+;
+
+logic_and:
+      comparison
+    | logic_and AND comparison
+;
+
+comparison:
+      addition
+    | comparison GREATER addition
+    | comparison GREATER_EQUAL addition
+    | comparison LESS addition
+    | comparison LESS_EQUAL addition
+    | comparison EQUAL_EQUAL addition
+    | comparison BANG_EQUAL addition
+;
+
+addition:
+      multiplication
+    | addition PLUS multiplication
+    | addition MINUS multiplication
+;
+
+multiplication:
+      unary
+    | multiplication STAR unary
+    | multiplication SLASH unary
+;
+
+unary:
+      factor
+    | BANG unary
+    | MINUS unary
+;
+
+factor:
       NUM
     | IDENTIFIER
     | STRING
     | TRUE                         { $$ = 1; }   /* valor booleano verdadeiro */
     | FALSE                        { $$ = 0; }   /* valor booleano falso */
     | LPAREN expression RPAREN
-    | comparison
-;
-
-comparison:
-      expression GREATER expression
-    | expression GREATER_EQUAL expression
-    | expression LESS expression
-    | expression LESS_EQUAL expression
-    | expression EQUAL_EQUAL expression
-    | expression BANG_EQUAL expression
 ;
 
 %%
