@@ -1,72 +1,77 @@
+%option noyywrap
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "../parser/parser.tab.h"  
 %}
 
 %%
 
-"//".*                          { /* Comentário de linha - ignorar */ }
-[ \t\r]+                        { /* Espaços em branco - ignorar */ }
+"//".*                          { /* comentário de linha */ }
+[ \t\r]+                        { /* espaço em branco */ }
 \n                              { yylineno++; }
 
-"and"                           { printf("AND\n"); }
-"class"                         { printf("CLASS\n"); }
-"else"                          { printf("ELSE\n"); }
-"false"                         { printf("FALSE\n"); }
-"for"                           { printf("FOR\n"); }
-"fun"                           { printf("FUN\n"); }
-"if"                            { printf("IF\n"); }
-"nil"                           { printf("NIL\n"); }
-"or"                            { printf("OR\n"); }
-"print"                         { printf("PRINT\n"); }
-"return"                        { printf("RETURN\n"); }
-"super"                         { printf("SUPER\n"); }
-"this"                          { printf("THIS\n"); }
-"true"                          { printf("TRUE\n"); }
-"var"                           { printf("VAR\n"); }
-"while"                         { printf("WHILE\n"); }
+"and"                           { return AND; }
+"class"                         { return CLASS; }
+"else"                          { return ELSE; }
+"false"                         { return FALSE; }
+"for"                           { return FOR; }
+"fun"                           { return FUN; }
+"if"                            { return IF; }
+"nil"                           { return NIL; }
+"or"                            { return OR; }
+"print"                         { return PRINT; }
+"return"                        { return RETURN; }
+"super"                         { return SUPER; }
+"this"                          { return THIS; }
+"true"                          { return TRUE; }
+"var"                           { return VAR; }
+"while"                         { return WHILE; }
 
-"=="                            { printf("EQUAL_EQUAL\n"); }
-"="                             { printf("EQUAL\n"); }
-"!="                            { printf("BANG_EQUAL\n"); }
-"!"                             { printf("BANG\n"); }
-"<="                            { printf("LESS_EQUAL\n"); }
-"<"                             { printf("LESS\n"); }
-">="                            { printf("GREATER_EQUAL\n"); }
-">"                             { printf("GREATER\n"); }
-"("                             { printf("LEFT_PAREN\n"); }
-")"                             { printf("RIGHT_PAREN\n"); }
-"{"                             { printf("LEFT_BRACE\n"); }
-"}"                             { printf("RIGHT_BRACE\n"); }
-","                             { printf("COMMA\n"); }
-"."                             { printf("DOT\n"); }
-"-"                             { printf("MINUS\n"); }
-"+"                             { printf("PLUS\n"); }
-";"                             { printf("SEMICOLON\n"); }
-"*"                             { printf("STAR\n"); }
-"/"                             { printf("SLASH\n"); }
+"=="                            { return EQUAL_EQUAL; }
+"="                             { return EQUAL; }
+"!="                            { return BANG_EQUAL; }
+"!"                             { return BANG; }
+"<="                            { return LESS_EQUAL; }
+"<"                             { return LESS; }
+">="                            { return GREATER_EQUAL; }
+">"                             { return GREATER; }
+"("                             { return LPAREN; }
+")"                             { return RPAREN; }
+"{"                             { return LBRACE; }
+"}"                             { return RBRACE; }
+","                             { return COMMA; }
+"."                             { return DOT; }
+"-"                             { return MINUS; }
+"+"                             { return PLUS; }
+";"                             { return SEMICOLON; }
+"*"                             { return STAR; }
+"/"                             { return SLASH; }
 
 [0-9]+(\.[0-9]+)?               { 
-                                  printf("NUMBER(%s)\n", yytext);
-                               }
+                                    yylval.number = atof(yytext);
+                                    return NUM;
+                                }
 
 \"([^\\\"]|\\.)*\"              { 
-                                  char* str = strdup(yytext + 1);
-                                  str[strlen(str) - 1] = '\0';
-                                  printf("STRING(%s)\n", str);
-                                  free(str);
-                               }
+                                    char* str = strdup(yytext + 1);
+                                    str[strlen(str) - 1] = '\0';
+                                    yylval.string = str;
+                                    return STRING;
+                                }
 
-[0-9]+[a-zA-Z_][a-zA-Z0-9_]*          { 
-                                  { printf("Identificador invalido: '%s'\n", yytext); }
-                               }
-                               
+[0-9]+[a-zA-Z_][a-zA-Z0-9_]*    { 
+                                    fprintf(stderr, "Identificador inválido na linha %d: '%s'\n", yylineno, yytext);
+                                }
+
 [a-zA-Z_][a-zA-Z0-9_]*          { 
-                                  printf("IDENTIFIER(%s)\n", yytext);
-                               }
+                                    yylval.identifier = strdup(yytext);
+                                    return IDENTIFIER;
+                                }
 
-.                               { printf("Caractere invalido: '%s'\n", yytext); }
+.                               { 
+                                    fprintf(stderr, "Caractere inválido na linha %d: '%s'\n", yylineno, yytext);
+                                }
 
 %%
