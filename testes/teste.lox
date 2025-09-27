@@ -1,7 +1,26 @@
+// Teste de um lexer e parser
+
 var x = 10;
+var y = 20;
 
-print x + 5;
+fun soma(a, b) {
+    return a + b;
+}
 
-if (x > 3) {
-  print "maior que três";
+fun subtrai(a, b) {
+    return a - b;
+}
+
+if (x > y) {
+    print "X é maior que Y";
+} else {
+    print "X não é maior que Y";
+}
+
+print soma(x, y);  // Deve imprimir 30
+print subtrai(x, y);  // Deve imprimir -10
+
+while (x < 15) {
+    x = x + 1;
+    print x;
 }

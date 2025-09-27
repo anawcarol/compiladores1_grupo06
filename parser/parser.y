@@ -43,9 +43,11 @@ statements:
 statement:
       var_decl
     | print_stmt
+    | return_stmt         // <- Nova regra adicionada aqui
     | if_stmt
     | expr_stmt
     | block
+    | fun_decl
 ;
 
 var_decl:
@@ -54,6 +56,10 @@ var_decl:
 
 print_stmt:
     PRINT expression SEMICOLON
+;
+
+return_stmt:               // <- Nova regra para lidar com `return`
+    RETURN expression SEMICOLON
 ;
 
 if_stmt:
@@ -66,6 +72,16 @@ block:
 
 expr_stmt:
     expression SEMICOLON
+;
+
+fun_decl:
+    FUN IDENTIFIER LPAREN params RPAREN block
+;
+
+params:
+      /* vazio */
+    | IDENTIFIER
+    | params COMMA IDENTIFIER
 ;
 
 expression:
@@ -114,8 +130,8 @@ factor:
       NUM
     | IDENTIFIER
     | STRING
-    | TRUE                         { $$ = 1; }   /* valor booleano verdadeiro */
-    | FALSE                        { $$ = 0; }   /* valor booleano falso */
+    | TRUE                         { $$ = 1; }
+    | FALSE                        { $$ = 0; }
     | LPAREN expression RPAREN
 ;
 
