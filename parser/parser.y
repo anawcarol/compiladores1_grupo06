@@ -43,8 +43,10 @@ statements:
 statement:
       var_decl
     | print_stmt
-    | return_stmt         // <- Nova regra adicionada aqui
+    | return_stmt
     | if_stmt
+    | while_stmt
+    | for_stmt
     | expr_stmt
     | block
     | fun_decl
@@ -58,16 +60,46 @@ print_stmt:
     PRINT expression SEMICOLON
 ;
 
-return_stmt:               // <- Nova regra para lidar com `return`
-    RETURN expression SEMICOLON
+return_stmt:
+      RETURN SEMICOLON
+    | RETURN expression SEMICOLON
 ;
 
 if_stmt:
-    IF LPAREN expression RPAREN block
+      IF LPAREN expression RPAREN block
+    | IF LPAREN expression RPAREN block ELSE block
 ;
 
-block:
-    LBRACE statements RBRACE
+while_stmt:
+    WHILE LPAREN expression RPAREN block
+;
+
+for_stmt:
+    FOR LPAREN for_init for_condition for_increment RPAREN block
+;
+
+for_init:
+      /* vazio */
+    | var_decl_no_semicolon
+    | expr_stmt_no_semicolon
+;
+
+for_condition:
+      /* vazio */
+    | expression
+;
+
+for_increment:
+      /* vazio */
+    | expression
+;
+
+var_decl_no_semicolon:
+    VAR IDENTIFIER EQUAL expression
+;
+
+expr_stmt_no_semicolon:
+    expression
 ;
 
 expr_stmt:
@@ -85,7 +117,12 @@ params:
 ;
 
 expression:
-      logic_or
+      assignment
+;
+
+assignment:
+      IDENTIFIER EQUAL assignment
+    | logic_or
 ;
 
 logic_or:
@@ -129,10 +166,22 @@ unary:
 factor:
       NUM
     | IDENTIFIER
+    | IDENTIFIER LPAREN arguments RPAREN
     | STRING
     | TRUE                         { $$ = 1; }
     | FALSE                        { $$ = 0; }
+    | NIL                          { $$ = 0; }
     | LPAREN expression RPAREN
+;
+
+arguments:
+      /* vazio */
+    | expression
+    | arguments COMMA expression
+;
+
+block:
+    LBRACE statements RBRACE
 ;
 
 %%

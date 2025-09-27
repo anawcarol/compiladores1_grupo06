@@ -24,3 +24,27 @@ while (x < 15) {
     x = x + 1;
     print x;
 }
+
+var x = 10;
+var y = x + 5;
+var z = y * 2;
+1 + 2 * 3;
+(4 + 5) * 2;
+10 / (2 + 3);
+x > 5;
+y <= 10;
+z == 20;
+x != y;
+true;
+false;
+true and false;
+x > 5 or y < 10;
+(x < 5) and (y >= 5);
+print "Hello, world!";
+print x + y;
+print true and false;
+
+var @name = 5;
+var 0x = 10;
+true and;
+if x > 5 print x;
