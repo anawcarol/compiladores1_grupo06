@@ -1,0 +1,100 @@
+// Arquivo de teste para erros sintáticos e léxicos na linguagem Lox.
+// O objetivo deste arquivo é FALHAR a análise, testando a detecção de erros.
+
+// ############################################
+// ## 1. Erros Léxicos (deveriam ser pegos pelo Lexer)
+// ############################################
+
+//var invalido = #; // Erro: Caractere '#' não reconhecido.
+//var outra_invalida = @; // Erro: Caractere '@' não reconhecido.
+
+//var str_infinita = "Esta string não é fechada;
+// Erro: String não terminada. O erro pode aparecer na linha seguinte.
+
+//var numero_mal_formado = 1.2.3;
+// Erro: Número com múltiplos pontos decimais.
+
+
+// ############################################
+// ## 2. Erros de Expressão (deveriam ser pegos pelo Parser)
+// ############################################
+
+//var a = 10 + ;    // Erro: Faltando operando após o '+'.
+//var b = * 5;      // Erro: Faltando operando antes do '*'.
+//var c = 1 + * 2;  // Erro: Operadores consecutivos.
+
+//print (1 + 2;     // Erro: Parêntese de agrupamento não fechado.
+
+//123 = 456;        // Erro: O lado esquerdo de uma atribuição deve ser uma variável (l-value).
+//(a + b) = 10;     // Erro: Expressões não podem ser alvos de atribuição.
+
+
+// ############################################
+// ## 3. Erros de Declaração e Instrução
+// ############################################
+
+//var x = 10        // Erro: Ponto e vírgula (;) faltando.
+//print "oi"        // Erro: Ponto e vírgula (;) faltando.
+
+//var;              // Erro: Faltando nome da variável.
+//var = 10;         // Erro: Faltando nome da variável.
+
+//{
+  //print "ok";
+//} else {          // Erro: 'else' sem um 'if' precedente.
+  //print "erro";
+//}
+
+//if (true);         // Erro: Corpo do 'if' não é uma instrução válida (faltou '{' ou instrução).
+
+return "valor";   // Erro: 'return' só pode ser usado dentro de uma função.
+
+
+// ############################################
+// ## 4. Erros em Estruturas de Controle
+// ############################################
+
+//while {           // Erro: Faltando a condição entre parênteses.
+//  print "loop";
+//}
+
+//for (var i = 0; i < 10) { // Erro: Faltando um ';' na declaração do for.
+//  print i;
+//}
+
+//for (var j = 0; j < 5; j = j + 1; j > 0) { // Erro: Cláusulas demais no for.
+//  print j;
+//}
+
+//for (;) print "ok"; // Isso deveria ser válido, mas vamos testar um caso que não é:
+//for (var k) {     // Erro: Sintaxe da declaração de variável incompleta dentro do for.
+//  print k;
+//}
+
+
+// ############################################
+// ## 5. Erros em Funções, Classes e Instâncias
+// ############################################
+
+//fun (a, b) {      // Erro: Nome da função faltando em uma declaração de alto nível.
+//  return a + b;
+//}
+
+//fun minhaFuncao(a, 123) { // Erro: Parâmetros devem ser identificadores, não literais.
+//  print a;
+//}
+
+//class MinhaClasse < 123 { // Erro: Uma classe só pode herdar de outra classe (um identificador).
+//  // ...
+//}
+
+//class OutraClasse {
+//  metodo() {
+//    super.metodo(); // Erro: 'super' usado em uma classe que não herda de nenhuma outra.
+//  }
+//}
+
+print this;       // Erro: 'this' não pode ser usado fora do método de uma classe.
+
+//var instancia = MinhaClasse();
+//instancia.;        // Erro: Esperado um nome de propriedade após o '.'.

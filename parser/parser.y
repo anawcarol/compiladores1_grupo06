@@ -76,8 +76,8 @@ return_stmt:
 ;
 
 if_stmt:
-      IF LPAREN expression RPAREN block
-    | IF LPAREN expression RPAREN block ELSE block
+      IF LPAREN expression RPAREN statement
+    | IF LPAREN expression RPAREN statement ELSE statement
 ;
 
 while_stmt:
