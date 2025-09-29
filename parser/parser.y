@@ -10,10 +10,14 @@ extern int yylineno;
 
 %define parse.error verbose
 
-%token AND OR CLASS ELSE FALSE FOR FUN IF NIL OR PRINT RETURN SUPER THIS TRUE VAR WHILE
+%token AND OR CLASS ELSE FALSE FOR FUN IF NIL PRINT RETURN SUPER THIS TRUE VAR WHILE
 %token EQUAL_EQUAL EQUAL BANG_EQUAL BANG LESS_EQUAL LESS GREATER_EQUAL GREATER
 %token LPAREN RPAREN LBRACE RBRACE COMMA DOT MINUS PLUS SEMICOLON STAR SLASH
-%token NUM STRING IDENTIFIER NEW TRY CATCH
+
+/* Tokens que carregam valores */
+%token <number> NUM
+%token <string> STRING
+%token <identifier> IDENTIFIER
 
 %union {
     double number;
@@ -22,10 +26,14 @@ extern int yylineno;
     int boolean;
 }
 
-%type <number> expression term factor
-%type <identifier> IDENTIFIER
-%type <string> STRING
-%type <boolean> BOOL_EXPR
+/* * CORREÇÃO 1: Unificando os tipos de todas as regras de expressão
+ * para evitar erros de "type clash". Isso é fundamental.
+ */
+%type <number> expression assignment logic_or logic_and comparison addition
+%type <number> multiplication unary call primary arguments
+
+/* Removido, pois não é usado */
+/* %type <boolean> BOOL_EXPR */
 
 %start program
 
@@ -51,7 +59,6 @@ statement:
     | block
     | fun_decl
     | class_decl
-    | try_stmt
 ;
 
 var_decl:
@@ -78,7 +85,7 @@ while_stmt:
 ;
 
 for_stmt:
-    FOR LPAREN for_init for_condition for_increment RPAREN block
+    FOR LPAREN for_init SEMICOLON for_condition SEMICOLON for_increment RPAREN block
 ;
 
 for_init:
@@ -126,22 +133,25 @@ class_decl:
 
 method_declarations:
       /* vazio */
-    | method_decl
     | method_declarations method_decl
 ;
 
 method_decl:
-      FUN IDENTIFIER LPAREN params RPAREN block
-    | IDENTIFIER LPAREN params RPAREN block
+    /* Simplificado. Opcionalmente, pode ser apenas "fun_decl" */
+    IDENTIFIER LPAREN params RPAREN block
 ;
 
 expression:
     assignment
 ;
 
+/* * CORREÇÃO 2: A regra de atribuição agora permite atribuir a membros de objetos.
+ * A expressão à esquerda do '=' (l-value) pode ser um 'call.IDENTIFIER'.
+ */
 assignment:
-      IDENTIFIER EQUAL assignment
-    | logic_or
+    call DOT IDENTIFIER EQUAL assignment
+  | IDENTIFIER EQUAL assignment
+  | logic_or
 ;
 
 logic_or:
@@ -176,24 +186,32 @@ multiplication:
     | multiplication SLASH unary
 ;
 
+/* A regra unary agora se baseia na nova regra 'call' */
 unary:
-      factor
+      call
     | BANG unary
     | MINUS unary
 ;
 
-factor:
-      NUM
-    | IDENTIFIER
-    | IDENTIFIER LPAREN arguments RPAREN
-    | STRING
-    
-    | TRUE                         { $$ = 1; }
-    | FALSE                        { $$ = 0; }
-    | NIL                          { $$ = 0; }
-    | LPAREN expression RPAREN
-    | NEW IDENTIFIER LPAREN arguments RPAREN
-    | THIS
+/* * CORREÇÃO 3: Nova regra 'call' para lidar com acesso a membros e chamadas de função.
+ * Isso torna a gramática muito mais poderosa e flexível.
+ */
+call:
+    primary
+  | call LPAREN arguments RPAREN   /* Chamada de função: foo() */
+  | call DOT IDENTIFIER            /* Acesso a membro: foo.bar */
+;
+
+/* A antiga regra 'factor' foi renomeada para 'primary' e simplificada. */
+primary:
+    NUM
+  | STRING
+  | IDENTIFIER
+  | TRUE
+  | FALSE
+  | NIL
+  | THIS
+  | LPAREN expression RPAREN
 ;
 
 arguments:
@@ -204,10 +222,6 @@ arguments:
 
 block:
     LBRACE statements RBRACE
-;
-
-try_stmt:
-    TRY block CATCH LPAREN IDENTIFIER RPAREN block
 ;
 
 %%

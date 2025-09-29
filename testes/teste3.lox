@@ -1,0 +1,158 @@
+// Arquivo de teste completo para a linguagem Lox
+// Foco: Validar o Lexer e o Parser.
+
+print "--- Iniciando Testes Abrangentes ---";
+
+// ############################################
+// ## 1. Literais e Expressões
+// ############################################
+print "--- Testando Literais e Expressões ---";
+
+print 123;          // Inteiro
+print 98.76;        // Decimal
+print "Olá, Lox!";  // String
+print true;         // Booleano
+print false;        // Booleano
+print nil;          // Nulo
+
+// Expressões Aritméticas com precedência e agrupamento
+print 1 + 2 * 3;      // Esperado: 7
+print (1 + 2) * 3;    // Esperado: 9
+print 10 / 5 - 2;     // Esperado: 0
+print -(5 - 2);       // Esperado: -3
+
+// Expressões de Comparação e Igualdade
+print 1 < 2;          // true
+print 1 >= 2;         // false
+print "a" == "a";     // true
+print "a" != "b";     // true
+print nil == nil;     // true
+
+
+// ############################################
+// ## 2. Variáveis e Atribuição
+// ############################################
+print "--- Testando Variáveis e Atribuição ---";
+
+var a = "valor inicial";
+print a;
+
+a = "valor reatribuído";
+print a;
+
+var b;
+print b; // Esperado: nil
+
+
+// ############################################
+// ## 3. Estruturas de Controle
+// ############################################
+print "--- Testando Estruturas de Controle ---";
+
+// Bloco e escopo
+var fora = "global";
+{
+  var dentro = "local";
+  print fora;
+  print dentro;
+}
+print fora;
+// print dentro; // Isso causaria um erro de tempo de execução (proposital)
+
+// Condicional if/else
+var cond = true;
+if (cond) {
+  print "Condição verdadeira";
+} else {
+  print "Condição falsa";
+}
+
+if (false) {
+  print "Não deve aparecer";
+}
+
+// Operadores Lógicos
+var t = true;
+var f = false;
+if (t and f) {
+  print "Não deve acontecer (AND)";
+}
+if (t or f) {
+  print "Deve acontecer (OR)";
+}
+
+// Laço While
+var i = 0;
+while (i < 3) {
+  print "while: " + i;
+  i = i + 1;
+}
+
+// Laço For (com todas as cláusulas)
+for (var j = 0; j < 3; j = j + 1) {
+  print "for: " + j;
+}
+
+// Laço For (com cláusulas vazias)
+var k = 0;
+for (; k < 2 ;) {
+  print "for sem cláusulas: " + k;
+  k = k + 1;
+}
+
+
+// ############################################
+// ## 4. Funções e Closures
+// ############################################
+print "--- Testando Funções e Closures ---";
+
+fun digaOla(primeiro, ultimo) {
+  print "Olá, " + primeiro + " " + ultimo + "!";
+}
+
+digaOla("Pedro", "Italiano");
+
+// Funções com retorno
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+print "Fibonacci de 7 é: " + fib(7);
+
+
+// Closures
+fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+  return count;
+}
+
+var counter = makeCounter();
+counter(); // 1
+counter(); // 2
+
+
+// ############################################
+// ## 5. Classes e Instâncias
+// ############################################
+print "--- Testando Classes e Instâncias ---";
+
+class Bolo {
+  init(sabor) {
+    this.sabor = sabor;
+  }
+
+  assar() {
+    print "Assando um bolo de " + this.sabor + ".";
+  }
+}
+
+var meuBolo = Bolo("chocolate");
+meuBolo.assar();
+
+// Acessando e atribuindo propriedades
+meuBolo.cobertura = "granulado";
+print "Cobertura: " + meuBolo.cobertura;
