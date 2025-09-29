@@ -13,7 +13,7 @@ extern int yylineno;
 %token AND OR CLASS ELSE FALSE FOR FUN IF NIL OR PRINT RETURN SUPER THIS TRUE VAR WHILE
 %token EQUAL_EQUAL EQUAL BANG_EQUAL BANG LESS_EQUAL LESS GREATER_EQUAL GREATER
 %token LPAREN RPAREN LBRACE RBRACE COMMA DOT MINUS PLUS SEMICOLON STAR SLASH
-%token NUM STRING IDENTIFIER
+%token NUM STRING IDENTIFIER NEW TRY CATCH
 
 %union {
     double number;
@@ -50,10 +50,13 @@ statement:
     | expr_stmt
     | block
     | fun_decl
+    | class_decl
+    | try_stmt
 ;
 
 var_decl:
-    VAR IDENTIFIER EQUAL expression SEMICOLON
+      VAR IDENTIFIER EQUAL expression SEMICOLON
+    | VAR IDENTIFIER SEMICOLON
 ;
 
 print_stmt:
@@ -95,7 +98,8 @@ for_increment:
 ;
 
 var_decl_no_semicolon:
-    VAR IDENTIFIER EQUAL expression
+      VAR IDENTIFIER EQUAL expression
+    | VAR IDENTIFIER
 ;
 
 expr_stmt_no_semicolon:
@@ -116,8 +120,23 @@ params:
     | params COMMA IDENTIFIER
 ;
 
+class_decl:
+    CLASS IDENTIFIER LBRACE method_declarations RBRACE
+;
+
+method_declarations:
+      /* vazio */
+    | method_decl
+    | method_declarations method_decl
+;
+
+method_decl:
+      FUN IDENTIFIER LPAREN params RPAREN block
+    | IDENTIFIER LPAREN params RPAREN block
+;
+
 expression:
-      assignment
+    assignment
 ;
 
 assignment:
@@ -168,10 +187,13 @@ factor:
     | IDENTIFIER
     | IDENTIFIER LPAREN arguments RPAREN
     | STRING
+    
     | TRUE                         { $$ = 1; }
     | FALSE                        { $$ = 0; }
     | NIL                          { $$ = 0; }
     | LPAREN expression RPAREN
+    | NEW IDENTIFIER LPAREN arguments RPAREN
+    | THIS
 ;
 
 arguments:
@@ -182,6 +204,10 @@ arguments:
 
 block:
     LBRACE statements RBRACE
+;
+
+try_stmt:
+    TRY block CATCH LPAREN IDENTIFIER RPAREN block
 ;
 
 %%
