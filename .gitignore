@@ -1,4 +1,20 @@
+# Arquivos gerados pelo Flex/Bison
+lexer/lex.yy.c
+parser/parser.tab.c
+parser/parser.tab.h
+
+# Executável
+compilador
+
+# Arquivos temporários
+*.o
+*.out
 *.exe
-*parser.tab.c
-*parser.tab.h
-*lex.yy.c
+
+# Backup files
+*~
+*.bak
+
+# Diretórios de build
+build/
+dist/
