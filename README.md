@@ -1,4 +1,4 @@
-````markdown
+
 # Compilador da Linguagem Lox
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -298,8 +298,5 @@ SEMICOLON
   * PEDRO RAMOS SOUSA REIS
   * CRISTIANO BORGES DE MORAIS
 
-**Disciplina:** Compiladores - 2025.2
-**Instituição:** [Universidade de Brasília]
-
-```
-```
+**Disciplina:**  Compiladores - 2025.2
+**Instituição:**  [Universidade de Brasília]
