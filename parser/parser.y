@@ -1,11 +1,17 @@
+/* * ARQUIVO: parser/parser.y
+ * Conteúdo completo e modificado.
+ */
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/* Incluir a AST e declarar a raiz global */
+#include "../ast/ast.h"
+NoAST *ast_root = NULL;
+
 void yyerror(const char* s);
 int yylex(void);
-void yyerror(const char *s);
 extern int yylineno;
 %}
 
@@ -24,205 +30,207 @@ extern int yylineno;
     double number;
     char* string;
     char* identifier;
-    int boolean;
+    NoAST *no_ast; /* Ponteiro para a AST */
 }
 
-/* * CORREÇÃO 1: Unificando os tipos de todas as regras de expressão
- * para evitar erros de "type clash". Isso é fundamental.
- */
-%type <number> expression assignment logic_or logic_and comparison addition
-%type <number> multiplication unary call primary arguments
-
-/* Removido, pois não é usado */
-/* %type <boolean> BOOL_EXPR */
+/* Modificado: Quase tudo agora retorna um <no_ast> */
+%type <no_ast> program statements statement
+%type <no_ast> var_decl print_stmt return_stmt if_stmt while_stmt for_stmt
+%type <no_ast> for_init for_condition for_increment
+%type <no_ast> var_decl_no_semicolon expr_stmt_no_semicolon
+%type <no_ast> expr_stmt block fun_decl params class_decl
+%type <no_ast> method_declarations method_decl
+%type <no_ast> expression assignment logic_or logic_and comparison addition
+%type <no_ast> multiplication unary call primary arguments
 
 %start program
 
 %%
 
 program:
-    statements
+    statements { ast_root = $1; } /* Salva a árvore final */
 ;
 
 statements:
-      /* vazio */
-    | statements statement
+      /* vazio */ { $$ = NULL; }
+    | statements statement { $$ = anexarNoLista($1, $2); }
 ;
 
 statement:
-      var_decl
-    | print_stmt
-    | return_stmt
-    | if_stmt
-    | while_stmt
-    | for_stmt
-    | expr_stmt
-    | block
-    | fun_decl
-    | class_decl
+      var_decl    { $$ = $1; }
+    | print_stmt  { $$ = $1; }
+    | return_stmt { $$ = $1; }
+    | if_stmt     { $$ = $1; }
+    | while_stmt  { $$ = $1; }
+    | for_stmt    { $$ = $1; }
+    | expr_stmt   { $$ = $1; }
+    | block       { $$ = $1; }
+    | fun_decl    { $$ = $1; }
+    | class_decl  { $$ = $1; }
 ;
 
 var_decl:
-      VAR IDENTIFIER EQUAL expression SEMICOLON
-    | VAR IDENTIFIER SEMICOLON
+      VAR IDENTIFIER EQUAL expression SEMICOLON { $$ = criarNoVarDecl($2, $4); }
+    | VAR IDENTIFIER SEMICOLON { $$ = criarNoVarDecl($2, NULL); }
 ;
 
 print_stmt:
-    PRINT expression SEMICOLON
+    PRINT expression SEMICOLON { $$ = criarNoPrintStmt($2); }
 ;
 
 return_stmt:
-      RETURN SEMICOLON
-    | RETURN expression SEMICOLON
+      RETURN SEMICOLON { $$ = criarNoReturn(NULL); }
+    | RETURN expression SEMICOLON { $$ = criarNoReturn($2); }
 ;
 
 if_stmt:
-      IF LPAREN expression RPAREN statement
+      IF LPAREN expression RPAREN statement 
+          { $$ = criarNoIf($3, $5, NULL); }
     | IF LPAREN expression RPAREN statement ELSE statement
+          { $$ = criarNoIf($3, $5, $7); }
 ;
 
 while_stmt:
-    WHILE LPAREN expression RPAREN block
+    WHILE LPAREN expression RPAREN block 
+          { $$ = criarNoWhile($3, $5); }
 ;
 
 for_stmt:
     FOR LPAREN for_init SEMICOLON for_condition SEMICOLON for_increment RPAREN block
+          { $$ = criarNoFor($3, $5, $7, $9); }
 ;
 
 for_init:
-      /* vazio */
-    | var_decl_no_semicolon
-    | expr_stmt_no_semicolon
+      /* vazio */ { $$ = NULL; }
+    | var_decl_no_semicolon { $$ = $1; }
+    | expr_stmt_no_semicolon { $$ = $1; }
 ;
 
 for_condition:
-      /* vazio */
-    | expression
+      /* vazio */ { $$ = NULL; } /* Será tratado como 'true' na semântica */
+    | expression { $$ = $1; }
 ;
 
 for_increment:
-      /* vazio */
-    | expression
+      /* vazio */ { $$ = NULL; }
+    | expression { $$ = $1; }
 ;
 
 var_decl_no_semicolon:
-      VAR IDENTIFIER EQUAL expression
-    | VAR IDENTIFIER
+      VAR IDENTIFIER EQUAL expression { $$ = criarNoVarDecl($2, $4); }
+    | VAR IDENTIFIER { $$ = criarNoVarDecl($2, NULL); }
 ;
 
 expr_stmt_no_semicolon:
-    expression
+    expression { $$ = criarNoExprStmt($1); }
 ;
 
 expr_stmt:
-    expression SEMICOLON
+    expression SEMICOLON { $$ = criarNoExprStmt($1); }
 ;
 
 fun_decl:
     FUN IDENTIFIER LPAREN params RPAREN block
+          { $$ = criarNoFunDecl($2, $4, $6); }
 ;
 
 params:
-      /* vazio */
-    | IDENTIFIER
-    | params COMMA IDENTIFIER
+      /* vazio */ { $$ = NULL; }
+    | IDENTIFIER { $$ = criarNoParam($1); }
+    | params COMMA IDENTIFIER { $$ = anexarNoLista($1, criarNoParam($3)); }
 ;
 
 class_decl:
     CLASS IDENTIFIER LBRACE method_declarations RBRACE
+          { $$ = criarNoClassDecl($2, $4); }
 ;
 
 method_declarations:
-      /* vazio */
-    | method_declarations method_decl
+      /* vazio */ { $$ = NULL; }
+    | method_declarations method_decl { $$ = anexarNoLista($1, $2); }
 ;
 
 method_decl:
-    /* Simplificado. Opcionalmente, pode ser apenas "fun_decl" */
+    /* Um método é apenas uma declaração de função */
     IDENTIFIER LPAREN params RPAREN block
+          { $$ = criarNoFunDecl($1, $3, $5); }
 ;
 
 expression:
-    assignment
+    assignment { $$ = $1; }
 ;
 
-/* * CORREÇÃO 2: A regra de atribuição agora permite atribuir a membros de objetos.
- * A expressão à esquerda do '=' (l-value) pode ser um 'call.IDENTIFIER'.
- */
 assignment:
-    call DOT IDENTIFIER EQUAL assignment
-  | IDENTIFIER EQUAL assignment
-  | logic_or
+      call DOT IDENTIFIER EQUAL assignment 
+          { $$ = criarNoSetAttr($1, $3, $5); }
+    | IDENTIFIER EQUAL assignment 
+          { $$ = criarNoAssign($1, $3); }
+    | logic_or { $$ = $1; }
 ;
 
 logic_or:
-      logic_and
-    | logic_or OR logic_and
+      logic_and { $$ = $1; }
+    | logic_or OR logic_and { $$ = criarNoOpLogico(OR, $1, $3); }
 ;
 
 logic_and:
-      comparison
-    | logic_and AND comparison
+      comparison { $$ = $1; }
+    | logic_and AND comparison { $$ = criarNoOpLogico(AND, $1, $3); }
 ;
 
 comparison:
-      addition
-    | comparison GREATER addition
-    | comparison GREATER_EQUAL addition
-    | comparison LESS addition
-    | comparison LESS_EQUAL addition
-    | comparison EQUAL_EQUAL addition
-    | comparison BANG_EQUAL addition
+      addition { $$ = $1; }
+    | comparison GREATER addition { $$ = criarNoOpBinario(GREATER, $1, $3); }
+    | comparison GREATER_EQUAL addition { $$ = criarNoOpBinario(GREATER_EQUAL, $1, $3); }
+    | comparison LESS addition { $$ = criarNoOpBinario(LESS, $1, $3); }
+    | comparison LESS_EQUAL addition { $$ = criarNoOpBinario(LESS_EQUAL, $1, $3); }
+    | comparison EQUAL_EQUAL addition { $$ = criarNoOpBinario(EQUAL_EQUAL, $1, $3); }
+    | comparison BANG_EQUAL addition { $$ = criarNoOpBinario(BANG_EQUAL, $1, $3); }
 ;
 
 addition:
-      multiplication
-    | addition PLUS multiplication
-    | addition MINUS multiplication
+      multiplication { $$ = $1; }
+    | addition PLUS multiplication { $$ = criarNoOpBinario(PLUS, $1, $3); }
+    | addition MINUS multiplication { $$ = criarNoOpBinario(MINUS, $1, $3); }
 ;
 
 multiplication:
-      unary
-    | multiplication STAR unary
-    | multiplication SLASH unary
+      unary { $$ = $1; }
+    | multiplication STAR unary { $$ = criarNoOpBinario(STAR, $1, $3); }
+    | multiplication SLASH unary { $$ = criarNoOpBinario(SLASH, $1, $3); }
 ;
 
-/* A regra unary agora se baseia na nova regra 'call' */
 unary:
-      call
-    | BANG unary
-    | MINUS unary
+      call { $$ = $1; }
+    | BANG unary { $$ = criarNoOpUnario(BANG, $2); }
+    | MINUS unary { $$ = criarNoOpUnario(MINUS, $2); }
 ;
 
-/* * CORREÇÃO 3: Nova regra 'call' para lidar com acesso a membros e chamadas de função.
- * Isso torna a gramática muito mais poderosa e flexível.
- */
 call:
-    primary
-  | call LPAREN arguments RPAREN   /* Chamada de função: foo() */
-  | call DOT IDENTIFIER            /* Acesso a membro: foo.bar */
+    primary { $$ = $1; }
+    | call LPAREN arguments RPAREN { $$ = criarNoCall($1, $3); }
+    | call DOT IDENTIFIER { $$ = criarNoGetAttr($1, $3); }
 ;
 
-/* A antiga regra 'factor' foi renomeada para 'primary' e simplificada. */
 primary:
-    NUM
-  | STRING
-  | IDENTIFIER
-  | TRUE
-  | FALSE
-  | NIL
-  | THIS
-  | LPAREN expression RPAREN
+    NUM { $$ = criarNoNum($1); }
+    | STRING { $$ = criarNoString($1); }
+    | IDENTIFIER { $$ = criarNoIdentifier($1); }
+    | TRUE { $$ = criarNoBool(1); }
+    | FALSE { $$ = criarNoBool(0); }
+    | NIL { $$ = criarNoNil(); }
+    | THIS { $$ = criarNoThis(); }
+    | LPAREN expression RPAREN { $$ = $2; }
 ;
 
 arguments:
-      /* vazio */
-    | expression
-    | arguments COMMA expression
+      /* vazio */ { $$ = NULL; }
+    | expression { $$ = $1; }
+    | arguments COMMA expression { $$ = anexarNoLista($1, $3); }
 ;
 
 block:
-    LBRACE statements RBRACE
+    LBRACE statements RBRACE { $$ = criarNoBlock($2); }
 ;
 
 %%
