@@ -43,8 +43,3 @@ x > 5 or y < 10;
 print "Hello, world!";
 print x + y;
 print true and false;
-
-var @name = 5;
-var 0x = 10;
-true and;
-if x > 5 print x;

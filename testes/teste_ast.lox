@@ -1,0 +1,11 @@
+// Arquivo de teste
+var a = 10;
+var b = a + 2 * 3;
+
+print b;
+
+if (b > 15) {
+  print "Maior que 15";
+} else {
+  print "Menor ou igual a 15";
+}
