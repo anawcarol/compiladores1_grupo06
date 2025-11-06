@@ -1,10 +1,6 @@
-/* * ARQUIVO: ast/ast.h
- * Conteúdo completo e modificado.
- */
 #ifndef AST_H
 #define AST_H
 
-// Corrigido: O caminho correto para tipos.h
 #include "../tabela/tipos.h" 
 
 // Prototipos das novas funcoes construtoras

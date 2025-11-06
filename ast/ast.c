@@ -1,16 +1,9 @@
-/* * ARQUIVO: ast/ast.c
- * Conteúdo completo e modificado.
- */
 #include "ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// Para incluir as definições dos tokens (ex: PLUS, MINUS)
-// Este arquivo é gerado pelo Bison no diretório 'parser'
 #include "../parser/parser.tab.h"
 
-// Função auxiliar genérica para criar um nó
 static NoAST* criarNoBase(NodeType type) {
     NoAST *node = (NoAST*) malloc(sizeof(NoAST));
     if (!node) {
@@ -19,12 +12,12 @@ static NoAST* criarNoBase(NodeType type) {
     }
     node->type = type;
     node->next = NULL;
-    extern int yylineno; // Pega o número da linha do lexer
+    extern int yylineno;
     node->lineno = yylineno;
     return node;
 }
 
-// --- Implementação dos Construtores ---
+// Implementação dos Construtores
 
 NoAST *criarNoNum(double value) {
     NoAST *node = criarNoBase(NODE_NUM);
@@ -34,7 +27,7 @@ NoAST *criarNoNum(double value) {
 
 NoAST *criarNoString(char* value) {
     NoAST *node = criarNoBase(NODE_STRING);
-    node->data.string = value; // strdup feito pelo lexer
+    node->data.string = value;
     return node;
 }
 
@@ -50,7 +43,7 @@ NoAST *criarNoNil(void) {
 
 NoAST *criarNoIdentifier(char* name) {
     NoAST *node = criarNoBase(NODE_IDENTIFIER);
-    node->data.identifier = name; // strdup feito pelo lexer
+    node->data.identifier = name;
     return node;
 }
 
@@ -75,7 +68,7 @@ NoAST *criarNoOpBinario(int op, NoAST *left, NoAST *right) {
 
 NoAST *criarNoOpLogico(int op, NoAST *left, NoAST *right) {
     NoAST *node = criarNoBase(NODE_LOGICAL_OP);
-    node->data.binary_op.op = op; // Reutiliza a struct binary_op
+    node->data.binary_op.op = op;
     node->data.binary_op.left = left;
     node->data.binary_op.right = right;
     return node;
@@ -98,21 +91,21 @@ NoAST *criarNoCall(NoAST *target, NoAST *arguments) {
 NoAST *criarNoGetAttr(NoAST *object, char *name) {
     NoAST *node = criarNoBase(NODE_GET_ATTR);
     node->data.get_attr.object = object;
-    node->data.get_attr.name = name; // strdup feito pelo parser
+    node->data.get_attr.name = name;
     return node;
 }
 
 NoAST *criarNoSetAttr(NoAST *object, char *name, NoAST *value) {
     NoAST *node = criarNoBase(NODE_SET_ATTR);
     node->data.set_attr.object = object;
-    node->data.set_attr.name = name; // strdup feito pelo parser
+    node->data.set_attr.name = name;
     node->data.set_attr.value = value;
     return node;
 }
 
 NoAST *criarNoVarDecl(char *name, NoAST *initializer) {
     NoAST *node = criarNoBase(NODE_VAR_DECL);
-    node->data.var_decl.name = name; // strdup feito pelo parser
+    node->data.var_decl.name = name;
     node->data.var_decl.initializer = initializer;
     return node;
 }
@@ -161,7 +154,7 @@ NoAST *criarNoFor(NoAST *init, NoAST *cond, NoAST *inc, NoAST *body) {
 
 NoAST *criarNoFunDecl(char *name, NoAST *params, NoAST *body) {
     NoAST *node = criarNoBase(NODE_FUN_DECL);
-    node->data.fun_decl.name = name; // strdup feito pelo parser
+    node->data.fun_decl.name = name;
     node->data.fun_decl.params = params;
     node->data.fun_decl.body = body;
     return node;
@@ -169,7 +162,7 @@ NoAST *criarNoFunDecl(char *name, NoAST *params, NoAST *body) {
 
 NoAST *criarNoClassDecl(char *name, NoAST *methods) {
     NoAST *node = criarNoBase(NODE_CLASS_DECL);
-    node->data.class_decl.name = name; // strdup feito pelo parser
+    node->data.class_decl.name = name;
     node->data.class_decl.methods = methods;
     return node;
 }
@@ -182,11 +175,11 @@ NoAST *criarNoReturn(NoAST *expression) {
 
 NoAST *criarNoParam(char *name) {
     NoAST *node = criarNoBase(NODE_PARAM);
-    node->data.identifier = name; // strdup feito pelo parser
+    node->data.identifier = name;
     return node;
 }
 
-// --- Funções Utilitárias ---
+// Funções Utilitárias 
 
 NoAST *anexarNoLista(NoAST *lista, NoAST *novo) {
     if (!lista) return novo;
@@ -373,13 +366,12 @@ void imprimirAST(NoAST *node, int indent) {
 void liberarAST(NoAST *node) {
     if (!node) return;
 
-    // Liberação pós-ordem
     switch (node->type) {
         case NODE_NUM:
         case NODE_BOOL:
         case NODE_NIL:
         case NODE_THIS:
-            break; // Sem filhos ou strings
+            break;
             
         case NODE_STRING: free(node->data.string); break;
         case NODE_IDENTIFIER: free(node->data.identifier); break;
@@ -486,6 +478,5 @@ void liberarAST(NoAST *node) {
             break;
     }
     
-    // Libera o próprio nó
     free(node);
 }

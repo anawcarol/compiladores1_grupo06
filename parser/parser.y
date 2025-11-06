@@ -1,12 +1,7 @@
-/* * ARQUIVO: parser/parser.y
- * Conteúdo completo e modificado.
- */
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* Incluir a AST e declarar a raiz global */
 #include "../ast/ast.h"
 NoAST *ast_root = NULL;
 
@@ -21,7 +16,6 @@ extern int yylineno;
 %token EQUAL_EQUAL EQUAL BANG_EQUAL BANG LESS_EQUAL LESS GREATER_EQUAL GREATER
 %token LPAREN RPAREN LBRACE RBRACE COMMA DOT MINUS PLUS SEMICOLON STAR SLASH
 
-/* Tokens que carregam valores */
 %token <number> NUM
 %token <string> STRING
 %token <identifier> IDENTIFIER
@@ -30,10 +24,9 @@ extern int yylineno;
     double number;
     char* string;
     char* identifier;
-    NoAST *no_ast; /* Ponteiro para a AST */
+    NoAST *no_ast;
 }
 
-/* Modificado: Quase tudo agora retorna um <no_ast> */
 %type <no_ast> program statements statement
 %type <no_ast> var_decl print_stmt return_stmt if_stmt while_stmt for_stmt
 %type <no_ast> for_init for_condition for_increment
@@ -107,7 +100,7 @@ for_init:
 ;
 
 for_condition:
-      /* vazio */ { $$ = NULL; } /* Será tratado como 'true' na semântica */
+      /* vazio */ { $$ = NULL; }
     | expression { $$ = $1; }
 ;
 
@@ -151,7 +144,6 @@ method_declarations:
 ;
 
 method_decl:
-    /* Um método é apenas uma declaração de função */
     IDENTIFIER LPAREN params RPAREN block
           { $$ = criarNoFunDecl($1, $3, $5); }
 ;

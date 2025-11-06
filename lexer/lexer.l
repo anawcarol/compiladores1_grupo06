@@ -1,18 +1,12 @@
 %option noyywrap
-/* --- NOVAS OPÇÕES --- */
 %option nounput
 %option noinput
-/* --- FIM NOVAS OPÇÕES --- */
 
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* --- NOVO INCLUDE --- */
-/* Precisamos disso ANTES de parser.tab.h para que NoAST seja definido */
 #include "../tabela/tipos.h"
-/* --- FIM NOVO INCLUDE --- */
 
 #include "../parser/parser.tab.h"  
 %}
