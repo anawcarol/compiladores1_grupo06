@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../ast/ast.h"
+#include "../tabela/tabela.h"
 
 int yyparse(void);
 extern FILE* yyin;
@@ -20,6 +21,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    tab_inicializar();
     int ret = yyparse();
 
     if (ret == 0) {
@@ -31,6 +33,8 @@ int main(int argc, char** argv) {
         }
 
         printf("---------------------------------\n");
+        
+        tab_imprimirTabela();
         
         NoAST *node = ast_root;
         while (node) {

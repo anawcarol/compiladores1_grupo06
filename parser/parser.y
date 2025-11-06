@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../ast/ast.h"
+#include "../tabela/tabela.h"
+
 NoAST *ast_root = NULL;
 
 void yyerror(const char* s);
@@ -41,7 +43,7 @@ extern int yylineno;
 %%
 
 program:
-    statements { ast_root = $1; } /* Salva a árvore final */
+    statements { ast_root = $1; }
 ;
 
 statements:
@@ -63,8 +65,8 @@ statement:
 ;
 
 var_decl:
-      VAR IDENTIFIER EQUAL expression SEMICOLON { $$ = criarNoVarDecl($2, $4); }
-    | VAR IDENTIFIER SEMICOLON { $$ = criarNoVarDecl($2, NULL); }
+      VAR IDENTIFIER EQUAL expression SEMICOLON { tab_inserirSimbolo($2, "var"); $$ = criarNoVarDecl($2, $4); }
+    | VAR IDENTIFIER SEMICOLON { tab_inserirSimbolo($2, "var"); $$ = criarNoVarDecl($2, NULL); }
 ;
 
 print_stmt:
@@ -110,8 +112,8 @@ for_increment:
 ;
 
 var_decl_no_semicolon:
-      VAR IDENTIFIER EQUAL expression { $$ = criarNoVarDecl($2, $4); }
-    | VAR IDENTIFIER { $$ = criarNoVarDecl($2, NULL); }
+      VAR IDENTIFIER EQUAL expression { tab_inserirSimbolo($2, "var"); $$ = criarNoVarDecl($2, $4); }
+    | VAR IDENTIFIER { tab_inserirSimbolo($2, "var"); $$ = criarNoVarDecl($2, NULL); }
 ;
 
 expr_stmt_no_semicolon:
@@ -123,19 +125,25 @@ expr_stmt:
 ;
 
 fun_decl:
-    FUN IDENTIFIER LPAREN params RPAREN block
-          { $$ = criarNoFunDecl($2, $4, $6); }
+    FUN IDENTIFIER 
+        { tab_inserirSimbolo($2, "fun"); } 
+    LPAREN 
+        { tab_entrarEscopo(); } 
+    params RPAREN block 
+        { /* tab_sairEscopo(); */ $$ = criarNoFunDecl($2, $6, $8); }
 ;
 
 params:
       /* vazio */ { $$ = NULL; }
-    | IDENTIFIER { $$ = criarNoParam($1); }
-    | params COMMA IDENTIFIER { $$ = anexarNoLista($1, criarNoParam($3)); }
+    | IDENTIFIER { tab_inserirSimbolo($1, "param"); $$ = criarNoParam($1); }
+    | params COMMA IDENTIFIER { tab_inserirSimbolo($3, "param"); $$ = anexarNoLista($1, criarNoParam($3)); }
 ;
 
 class_decl:
-    CLASS IDENTIFIER LBRACE method_declarations RBRACE
-          { $$ = criarNoClassDecl($2, $4); }
+    CLASS IDENTIFIER 
+        { tab_inserirSimbolo($2, "class"); tab_entrarEscopo(); } 
+    LBRACE method_declarations RBRACE
+        { /* tab_sairEscopo(); */; $$ = criarNoClassDecl($2, $5); }
 ;
 
 method_declarations:
@@ -144,8 +152,12 @@ method_declarations:
 ;
 
 method_decl:
-    IDENTIFIER LPAREN params RPAREN block
-          { $$ = criarNoFunDecl($1, $3, $5); }
+    IDENTIFIER 
+        { tab_inserirSimbolo($1, "method"); }
+    LPAREN 
+        { tab_entrarEscopo(); } 
+    params RPAREN block
+        { /* tab_sairEscopo(); */; $$ = criarNoFunDecl($1, $5, $7); }
 ;
 
 expression:
@@ -222,7 +234,7 @@ arguments:
 ;
 
 block:
-    LBRACE statements RBRACE { $$ = criarNoBlock($2); }
+    LBRACE { tab_entrarEscopo(); } statements RBRACE { /* tab_sairEscopo(); */; $$ = criarNoBlock($3); }
 ;
 
 %%
