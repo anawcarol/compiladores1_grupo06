@@ -1,0 +1,26 @@
+var a = "global_a";
+var b = "global_b";
+
+fun minhaFuncao(param1) {
+  var b = "local_b_funcao";
+  print a;
+  print b;
+  print param1;
+}
+
+class MinhaClasse {
+  metodo(p_metodo) {
+    var c = "local_c_metodo";
+    print c;
+    print p_metodo;
+  }
+}
+
+{
+  var a = "bloco_a";
+  var d = "bloco_d";
+  print a;
+  print d;
+}
+
+print a;
