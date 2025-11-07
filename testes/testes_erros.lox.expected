@@ -1,16 +1,13 @@
-Erro: Caractere '#' não reconhecido.
-Erro: String não terminada.
-Erro: Número com múltiplos pontos decimais.
-Erro: Faltando operando após o '+'.
-Erro: Faltando operando antes do '*'.
-Erro: Parêntese de agrupamento não fechado.
-Erro: O lado esquerdo de uma atribuição deve ser uma variável (l-value).
-Erro: Faltando ponto e vírgula.
-Erro: 'else' sem um 'if' precedente.
-Erro: 'return' só pode ser usado dentro de uma função.
-Erro: Faltando a condição entre parênteses.
-Erro: Sintaxe da declaração de variável incompleta dentro do for.
-Erro: Nome da função faltando em uma declaração de alto nível.
-Erro: Parâmetros devem ser identificadores, não literais.
-Erro: 'this' não pode ser usado fora do método de uma classe.
-Erro: Esperado um nome de propriedade após o '.'.
+Analise sintatica concluida com sucesso!
+
+--- Arvore Sintatica Abstrata ---
+ReturnStmt
+  String: "valor"
+PrintStmt
+  This
+---------------------------------
+
+--- Tabela de SÃ­mbolos (VisÃ£o Atual) ---
+--- Escopo NÃ­vel 0 ---
+ (vazio)
+------------------------------------------
