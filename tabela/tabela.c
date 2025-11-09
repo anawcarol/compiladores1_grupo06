@@ -3,54 +3,82 @@
 #include <stdlib.h>
 #include <string.h>
 
-Ambiente *ambienteAtual = NULL;
+Simbolo *tabela_hash[TAM_HASH];
+int escopoAtual = 0;
+
+unsigned int hash(char *nome) {
+    unsigned int hash_val = 0;
+    while (*nome) {
+        hash_val = (hash_val << 5) + *nome++;
+    }
+    return hash_val % TAM_HASH;
+}
 
 void tab_inicializar() {
-    ambienteAtual = (Ambiente *)malloc(sizeof(Ambiente));
-    if (ambienteAtual == NULL) {
-        fprintf(stderr, "Erro de alocação de memória para o escopo global.\n");
-        exit(EXIT_FAILURE);
+    escopoAtual = 0;
+    for (int i = 0; i < TAM_HASH; i++) {
+        tabela_hash[i] = NULL;
     }
-    ambienteAtual->head = NULL;
-    ambienteAtual->pai = NULL;
 }
 
 void tab_entrarEscopo() {
-    Ambiente *novoAmbiente = (Ambiente *)malloc(sizeof(Ambiente));
-    if (novoAmbiente == NULL) {
-        fprintf(stderr, "Erro de alocação de memória para novo escopo.\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    novoAmbiente->head = NULL;
-    novoAmbiente->pai = ambienteAtual;
-    ambienteAtual = novoAmbiente;
+    escopoAtual++;
 }
 
 void tab_sairEscopo() {
-    if (ambienteAtual == NULL) {
-        fprintf(stderr, "Erro: Tentando sair de um escopo nulo.\n");
-        return;
-    }
+    if (escopoAtual < 0) return;
 
-    Simbolo *s = ambienteAtual->head;
-    while (s != NULL) {
-        Simbolo *temp = s;
-        s = s->prox;
-        free(temp); 
-    }
+    for (int i = 0; i < TAM_HASH; i++) {
+        Simbolo *atual = tabela_hash[i];
+        Simbolo *anterior = NULL;
 
-    Ambiente *escopoAntigo = ambienteAtual;
-    
-    ambienteAtual = ambienteAtual->pai;
-    
-    free(escopoAntigo);
+        while (atual != NULL) {
+            if (atual->escopo == escopoAtual) {
+                Simbolo *temp = atual;
+                if (anterior == NULL) {
+                    tabela_hash[i] = atual->prox;
+                } else {
+                    anterior->prox = atual->prox;
+                }
+                atual = atual->prox;
+                free(temp);
+            } else {
+                anterior = atual;
+                atual = atual->prox;
+            }
+        }
+    }
+    escopoAtual--;
+}
+
+Simbolo *tab_buscarSimboloNoEscopo(char *nome, int escopo) {
+    unsigned int index = hash(nome);
+    for (Simbolo *s = tabela_hash[index]; s != NULL; s = s->prox) {
+        if (strcmp(s->nome, nome) == 0 && s->escopo == escopo) {
+            return s;
+        }
+    }
+    return NULL;
+}
+
+Simbolo *tab_buscarSimboloLocal(char *nome) {
+    return tab_buscarSimboloNoEscopo(nome, escopoAtual);
+}
+
+Simbolo *tab_buscarSimbolo(char *nome) {
+    for (int e = escopoAtual; e >= 0; e--) {
+        Simbolo *s = tab_buscarSimboloNoEscopo(nome, e);
+        if (s != NULL) {
+            return s;
+        }
+    }
+    return NULL;
 }
 
 void tab_inserirSimbolo(char *nome, char *tipo) {
     if (tab_buscarSimboloLocal(nome) != NULL) {
         fprintf(stderr, "Erro Semântico: Símbolo '%s' já declarado neste escopo.\n", nome);
-        return; 
+        return;
     }
 
     Simbolo *novo = (Simbolo *)malloc(sizeof(Simbolo));
@@ -64,59 +92,23 @@ void tab_inserirSimbolo(char *nome, char *tipo) {
 
     strncpy(novo->tipo, tipo, sizeof(novo->tipo) - 1);
     novo->tipo[sizeof(novo->tipo) - 1] = '\0';
-
-    novo->prox = ambienteAtual->head;
-    ambienteAtual->head = novo;
-}
-
-Simbolo *tab_buscarSimboloLocal(char *nome) {
-    if (ambienteAtual == NULL) return NULL;
-
-    for (Simbolo *s = ambienteAtual->head; s != NULL; s = s->prox) {
-        if (strcmp(s->nome, nome) == 0) {
-            return s;
-        }
-    }
     
-    return NULL;
-}
+    novo->escopo = escopoAtual;
 
-Simbolo *tab_buscarSimbolo(char *nome) {
-    for (Ambiente *escopo = ambienteAtual; escopo != NULL; escopo = escopo->pai) {
-        for (Simbolo *s = escopo->head; s != NULL; s = s->prox) {
-            if (strcmp(s->nome, nome) == 0) {
-                return s;
-            }
-        }
-    }
-    
-    return NULL;
-}
-
-void imprimirEscopo(Ambiente *escopo, int nivel) {
-    if (escopo == NULL) return;
-
-    imprimirEscopo(escopo->pai, nivel - 1);
-
-    char indent[100] = {0};
-    for(int i = 0; i < nivel; i++) strcat(indent, "  ");
-
-    printf("%s--- Escopo Nível %d ---\n", indent, nivel);
-    if (escopo->head == NULL) {
-        printf("%s (vazio)\n", indent);
-    } else {
-        for (Simbolo *s = escopo->head; s != NULL; s = s->prox) {
-            printf("%s Nome: %s, Tipo: %s\n", indent, s->nome, s->tipo);
-        }
-    }
+    unsigned int index = hash(nome);
+    novo->prox = tabela_hash[index];
+    tabela_hash[index] = novo;
 }
 
 void tab_imprimirTabela() {
-    printf("\n--- Tabela de Símbolos (Visão Atual) ---\n");
-    int profundidade = 0;
-    for (Ambiente *a = ambienteAtual; a != NULL; a = a->pai) {
-        profundidade++;
+    printf("\n--- Tabela de Símbolos (Visão Hash) ---\n");
+    for (int i = 0; i < TAM_HASH; i++) {
+        if (tabela_hash[i] != NULL) {
+            printf("Bucket %d:\n", i);
+            for (Simbolo *s = tabela_hash[i]; s != NULL; s = s->prox) {
+                printf("  -> Nome: %s, Tipo: %s, Escopo: %d\n", s->nome, s->tipo, s->escopo);
+            }
+        }
     }
-    imprimirEscopo(ambienteAtual, profundidade - 1);
-    printf("------------------------------------------\n");
+    printf("---------------------------------------\n");
 }
