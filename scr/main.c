@@ -3,6 +3,7 @@
 
 #include "../ast/ast.h"
 #include "../tabela/tabela.h"
+#include "../semantica/semantica.h"
 
 int yyparse(void);
 extern FILE* yyin;
@@ -26,6 +27,11 @@ int main(int argc, char** argv) {
 
     if (ret == 0) {
         printf("Analise sintatica concluida com sucesso!\n\n");
+        
+        printf("--- Iniciando Analise Semantica ---\n");
+        resolver(ast_root);
+        printf("--- Analise Semantica Concluida ---\n\n");
+
         printf("--- Arvore Sintatica Abstrata ---\n");
 
         for (NoAST *node = ast_root; node; node = node->next) {
