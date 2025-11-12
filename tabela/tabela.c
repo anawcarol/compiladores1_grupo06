@@ -26,7 +26,7 @@ void tab_entrarEscopo() {
 }
 
 void tab_sairEscopo() {
-    if (escopoAtual < 0) return;
+    /* if (escopoAtual < 0) return;
 
     for (int i = 0; i < TAM_HASH; i++) {
         Simbolo *atual = tabela_hash[i];
@@ -47,7 +47,8 @@ void tab_sairEscopo() {
                 atual = atual->prox;
             }
         }
-    }
+    }*/
+    if (escopoAtual <= 0) return;
     escopoAtual--;
 }
 
