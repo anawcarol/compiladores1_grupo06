@@ -1,0 +1,26 @@
+var x = 10;        
+var y = 20.5;      
+var nome = "oi";  
+var frase = "Lox é dinamicamente tipada";
+var ativo = true;  
+var desligado = false;
+var nada = nil;    
+
+
+while (x < 10) {
+    x = x + 1;
+    var c = 1;
+    while (x > 10) {
+        y = y + 1;
+        var z = 2;
+    }
+}
+while (y < 10) {
+    y = y + 1;
+    var d = 1;
+    while (y > 10) {
+        x = x + 1;
+    }
+}
+
+var k = 2;

@@ -12,6 +12,7 @@ SEMANTICA_C = semantica/semantica.c
 LEXER_C = lexer/lex.yy.c
 PARSER_C = parser/parser.tab.c
 PARSER_H = parser/parser.tab.h
+PARSER_O = parser/parser.output
 
 CC = gcc
 CFLAGS = -Wall -g
@@ -41,7 +42,7 @@ test: $(TARGET)
 # Limpeza de arquivos gerados
 clean:
 	# Limpa o alvo $(TARGET) (sem .exe) e o parser.output
-	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H) parser.output
+	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H) $(PARSER_O)
 	rm -f bin/test_compilador
 
 # Criar diretórios de binários se necessário

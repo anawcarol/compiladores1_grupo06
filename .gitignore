@@ -2,6 +2,7 @@
 lexer/lex.yy.c
 parser/parser.tab.c
 parser/parser.tab.h
+parser/parser.output
 
 # Executável
 compilador

@@ -36,5 +36,6 @@ NoAST *criarNoParam(char *name);
 NoAST *anexarNoLista(NoAST *lista, NoAST *novo);
 void imprimirAST(NoAST *raiz, int indent);
 void liberarAST(NoAST *raiz);
+char* obterNomeTipo(NoAST *no);
 
 #endif

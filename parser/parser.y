@@ -65,8 +65,18 @@ statement:
 ;
 
 var_decl:
-      VAR IDENTIFIER EQUAL expression SEMICOLON { $$ = criarNoVarDecl($2, $4); }
-    | VAR IDENTIFIER SEMICOLON { $$ = criarNoVarDecl($2, NULL); }
+      VAR IDENTIFIER EQUAL expression SEMICOLON { 
+          char *tipoInfernido = obterNomeTipo($4);
+          
+          tab_inserirSimbolo($2, tipoInfernido); 
+          
+          $$ = criarNoVarDecl($2, $4); 
+      }
+    | VAR IDENTIFIER SEMICOLON { 
+          // Variável sem valor inicial é nil
+          tab_inserirSimbolo($2, "nil"); 
+          $$ = criarNoVarDecl($2, NULL); 
+      }
 ;
 
 print_stmt:
@@ -91,8 +101,16 @@ while_stmt:
 ;
 
 for_stmt:
-    FOR LPAREN for_init SEMICOLON for_condition SEMICOLON for_increment RPAREN block
-          { $$ = criarNoFor($3, $5, $7, $9); }
+    FOR LPAREN 
+            { tab_entrarEscopo(); }
+        for_init SEMICOLON 
+        for_condition SEMICOLON 
+        for_increment RPAREN 
+        block
+            { 
+                tab_sairEscopo(); 
+                $$ = criarNoFor($4, $6, $8, $10); 
+            }
 ;
 
 for_init:
@@ -112,8 +130,15 @@ for_increment:
 ;
 
 var_decl_no_semicolon:
-      VAR IDENTIFIER EQUAL expression { $$ = criarNoVarDecl($2, $4); }
-    | VAR IDENTIFIER { $$ = criarNoVarDecl($2, NULL); }
+      VAR IDENTIFIER EQUAL expression { 
+          char *tipoInfernido = obterNomeTipo($4);
+          tab_inserirSimbolo($2, tipoInfernido); 
+          $$ = criarNoVarDecl($2, $4); 
+      }
+    | VAR IDENTIFIER { 
+          tab_inserirSimbolo($2, "nil"); 
+          $$ = criarNoVarDecl($2, NULL); 
+      }
 ;
 
 expr_stmt_no_semicolon:
@@ -125,19 +150,25 @@ expr_stmt:
 ;
 
 fun_decl:
-    FUN IDENTIFIER LPAREN params RPAREN block
-          { $$ = criarNoFunDecl($2, $4, $6); }
+    FUN IDENTIFIER 
+        { tab_inserirSimbolo($2, "fun"); } 
+    LPAREN 
+        { tab_entrarEscopo(); } 
+    params RPAREN block 
+        { tab_sairEscopo(); $$ = criarNoFunDecl($2, $6, $8); }
 ;
 
 params:
       /* vazio */ { $$ = NULL; }
-    | IDENTIFIER { $$ = criarNoParam($1); }
-    | params COMMA IDENTIFIER { $$ = anexarNoLista($1, criarNoParam($3)); }
+    | IDENTIFIER { tab_inserirSimbolo($1, "param"); $$ = criarNoParam($1); }
+    | params COMMA IDENTIFIER { tab_inserirSimbolo($3, "param"); $$ = anexarNoLista($1, criarNoParam($3)); }
 ;
 
 class_decl:
-    CLASS IDENTIFIER LBRACE method_declarations RBRACE
-          { $$ = criarNoClassDecl($2, $4); }
+    CLASS IDENTIFIER 
+        { tab_inserirSimbolo($2, "class"); tab_entrarEscopo(); } 
+    LBRACE method_declarations RBRACE
+        { tab_sairEscopo(); $$ = criarNoClassDecl($2, $5); }
 ;
 
 method_declarations:
@@ -146,8 +177,12 @@ method_declarations:
 ;
 
 method_decl:
-    IDENTIFIER LPAREN params RPAREN block
-          { $$ = criarNoFunDecl($1, $3, $5); }
+    IDENTIFIER 
+        { tab_inserirSimbolo($1, "method"); }
+    LPAREN 
+        { tab_entrarEscopo(); }
+    params RPAREN block
+        { tab_sairEscopo(); $$ = criarNoFunDecl($1, $5, $7); }
 ;
 
 expression:
@@ -224,7 +259,7 @@ arguments:
 ;
 
 block:
-    LBRACE statements RBRACE { $$ = criarNoBlock($2); }
+    LBRACE { tab_entrarEscopo(); } statements RBRACE { tab_sairEscopo(); $$ = criarNoBlock($3); }
 ;
 
 %%

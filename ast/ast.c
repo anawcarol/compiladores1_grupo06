@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "../parser/parser.tab.h"
 
 static NoAST* criarNoBase(NodeType type) {
@@ -178,6 +179,33 @@ NoAST *criarNoParam(char *name) {
     node->data.identifier = name;
     return node;
 }
+
+// Retorna uma string representando o tipo do nó para a Tabela de Símbolos
+char* obterNomeTipo(NoAST *no) {
+    if (no == NULL) return "nil";
+
+    switch (no->type) {
+        case NODE_NUM:
+            if (no->data.number == floor(no->data.number)) {
+                return "int";
+            }
+            return "float";
+
+        case NODE_STRING:
+            return "string";
+
+        case NODE_BOOL:
+            return "bool";
+
+        case NODE_NIL:
+            return "nil";
+            
+        default:
+            return "dynamic"; 
+    }
+}
+// ------------------------------
+
 
 // Funções Utilitárias 
 

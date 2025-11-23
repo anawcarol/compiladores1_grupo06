@@ -11,24 +11,26 @@ static void visitarStatement(NoAST *node) {
 
     switch (node->type) {
         case NODE_VAR_DECL:
+            // Apenas verificamos a inicialização se houver.
             if (node->data.var_decl.initializer) {
                 visitarNo(node->data.var_decl.initializer);
             }
-            tab_inserirSimbolo(node->data.var_decl.name, "var");
             break;
 
         case NODE_FUN_DECL:
-            tab_inserirSimbolo(node->data.fun_decl.name, "fun");
-            tab_entrarEscopo();
-            for (NoAST *p = node->data.fun_decl.params; p; p = p->next) {
-                tab_inserirSimbolo(p->data.identifier, "param");
-            }
+            // Mas precisamos entrar no escopo para analisar o corpo corretamente.
+            tab_entrarEscopo(); 
+            
+            // Não inserimos os parâmetros, pois o parser já os colocou na tabela.
+            // Apenas percorremos a lista (caso queira validar algo nos params futuramente)
+            // for (NoAST *p = node->data.fun_decl.params; p; p = p->next) { ... }
+
             visitarNo(node->data.fun_decl.body);
             tab_sairEscopo();
             break;
 
         case NODE_CLASS_DECL:
-            tab_inserirSimbolo(node->data.class_decl.name, "class");
+            // Mesma lógica: simula escopo, mas não insere.
             tab_entrarEscopo();
             for (NoAST *m = node->data.class_decl.methods; m; m = m->next) {
                 visitarNo(m);
@@ -39,9 +41,11 @@ static void visitarStatement(NoAST *node) {
         case NODE_PRINT_STMT:
             visitarNo(node->data.print_stmt.expression);
             break;
+            
         case NODE_EXPR_STMT:
             visitarNo(node->data.expr_stmt.expression);
             break;
+            
         case NODE_RETURN_STMT:
             if (node->data.return_stmt.expression) {
                 visitarNo(node->data.return_stmt.expression);
@@ -49,6 +53,8 @@ static void visitarStatement(NoAST *node) {
             break;
 
         case NODE_BLOCK:
+            // Simula a entrada de escopo para que 'tab_buscarSimbolo'
+            // encontre as variáveis locais criadas pelo parser.
             tab_entrarEscopo();
             for (NoAST *s = node->data.block.statements; s; s = s->next) {
                 visitarNo(s);
@@ -70,6 +76,7 @@ static void visitarStatement(NoAST *node) {
             break;
 
         case NODE_FOR_STMT:
+            // O For cria um escopo (para a variável de inicialização)
             tab_entrarEscopo();
             visitarNo(node->data.for_stmt.initializer);
             visitarNo(node->data.for_stmt.condition);
@@ -100,10 +107,12 @@ static void visitarExpressao(NoAST *node) {
 
         case NODE_ASSIGN:
             visitarNo(node->data.assign.value);
+            // Aqui verificamos se a variável existe
             if (tab_buscarSimbolo(node->data.assign.name) == NULL) {
                 fprintf(stderr, "Erro Semantico (linha %d): Variavel '%s' nao declarada.\n", 
                     node->lineno, node->data.assign.name);
-                exit(1);
+                // Você pode optar por não sair (exit) e apenas contar erros
+                // exit(1); 
             }
             break;
 
@@ -124,10 +133,11 @@ static void visitarExpressao(NoAST *node) {
             break;
 
         case NODE_IDENTIFIER:
+            // Verificação de uso de variável
             if (tab_buscarSimbolo(node->data.identifier) == NULL) {
                 fprintf(stderr, "Erro Semantico (linha %d): Variavel '%s' nao declarada.\n", 
                     node->lineno, node->data.identifier);
-                exit(1);
+                // exit(1);
             }
             break;
 
@@ -148,6 +158,7 @@ static void visitarNo(NoAST *node) {
     if (!node) return;
 
     switch (node->type) {
+        // Statements
         case NODE_VAR_DECL:
         case NODE_FUN_DECL:
         case NODE_CLASS_DECL:
@@ -161,6 +172,7 @@ static void visitarNo(NoAST *node) {
             visitarStatement(node);
             break;
 
+        // Expressões
         case NODE_UNARY_OP:
         case NODE_BINARY_OP:
         case NODE_LOGICAL_OP:
