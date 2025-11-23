@@ -9,6 +9,7 @@ typedef struct simbolo {
     char nome[32];
     char tipo[16];
     int escopo;
+    int numParams;
     struct simbolo *prox;
 } Simbolo;
 

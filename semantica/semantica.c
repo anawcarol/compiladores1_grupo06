@@ -25,6 +25,16 @@ static void visitarNo(NoAST *node, FunctionType funcType, ClassType classType);
 
 // --- Verificações Auxiliares ---
 
+// Conta quantos nós existem numa lista ligada (para params ou args)
+static int contarNos(NoAST *lista) {
+    int count = 0;
+    while (lista) {
+        count++;
+        lista = lista->next;
+    }
+    return count;
+}
+
 // Verifica se os tipos de uma operação binária são compatíveis (ex: Num + Num)
 // Emite AVISOS (warnings) em vez de erros fatais, pois Lox é dinâmica.
 static void verificarTiposBinarios(NoAST *node) {
@@ -34,9 +44,16 @@ static void verificarTiposBinarios(NoAST *node) {
     NoAST *dir = node->data.binary_op.right;
     int op = node->data.binary_op.op;
 
-    // Obtém strings representando os tipos (ex: "int", "string", "bool")
+    // Obtém strings representando os tipos
     char *tipoEsq = obterNomeTipo(esq);
     char *tipoDir = obterNomeTipo(dir);
+
+    // [CORREÇÃO] Ignora verificação se o tipo for "dynamic" OU "param"
+    // Parâmetros em Lox podem ser qualquer coisa, então não podemos assumir erro estático.
+    if (strcmp(tipoEsq, "dynamic") == 0 || strcmp(tipoDir, "dynamic") == 0 ||
+        strcmp(tipoEsq, "param") == 0   || strcmp(tipoDir, "param") == 0) {
+        return;
+    }
 
     // Regra para Soma (+): Aceita Num+Num ou String+String
     if (op == PLUS) {
@@ -50,7 +67,7 @@ static void verificarTiposBinarios(NoAST *node) {
                 node->lineno, tipoEsq, tipoDir);
         }
     }
-    // Outras operações aritméticas e relacionais esperam números
+    // Outras operações aritméticas esperam números
     else if (op == MINUS || op == STAR || op == SLASH || 
              op == GREATER || op == GREATER_EQUAL || 
              op == LESS || op == LESS_EQUAL) {
@@ -74,12 +91,38 @@ static void visitarStatement(NoAST *node, FunctionType funcType, ClassType class
             if (node->data.var_decl.initializer) {
                 visitarNo(node->data.var_decl.initializer, funcType, classType);
             }
+            
+            // Insere a variável na tabela se não existir no escopo local.
+            // Necessário porque o 'parser' pode já ter limpado o escopo, 
+            // então reinserimos durante a análise semântica.
+            if (tab_buscarSimboloLocal(node->data.var_decl.name) == NULL) {
+                char *tipo = "var";
+                if (node->data.var_decl.initializer) {
+                    tipo = obterNomeTipo(node->data.var_decl.initializer);
+                }
+                tab_inserirSimbolo(node->data.var_decl.name, tipo);
+            }
             break;
 
-        case NODE_FUN_DECL:
-            // Mas precisamos entrar no escopo para analisar o corpo corretamente.
+        case NODE_FUN_DECL: {
+            // Garante que a função está na tabela e atualiza Aridade
+            if (tab_buscarSimboloLocal(node->data.fun_decl.name) == NULL) {
+                tab_inserirSimbolo(node->data.fun_decl.name, "fun");
+            }
+            Simbolo *s = tab_buscarSimbolo(node->data.fun_decl.name);
+            if (s) {
+                s->numParams = contarNos(node->data.fun_decl.params);
+            }
+
+            // Entra no escopo da função
             tab_entrarEscopo(); 
             
+            // Insere os parâmetros na tabela de símbolos
+            // Isso corrige os erros de "Variavel 'a' nao declarada" dentro da função.
+            for (NoAST *p = node->data.fun_decl.params; p; p = p->next) {
+                tab_inserirSimbolo(p->data.identifier, "param");
+            }
+
             // Determina o novo contexto de função
             FunctionType novoFuncType = CTX_FUNC_FUNCTION;
             if (classType != CTX_CLASS_NONE) {
@@ -89,20 +132,42 @@ static void visitarStatement(NoAST *node, FunctionType funcType, ClassType class
                     novoFuncType = CTX_FUNC_METHOD;
             }
 
-            // Não inserimos os parâmetros aqui, pois o parser já os colocou na tabela.
             visitarNo(node->data.fun_decl.body, novoFuncType, classType);
             tab_sairEscopo();
             break;
+        }
 
-        case NODE_CLASS_DECL:
+        case NODE_CLASS_DECL: {
+            // Insere classe na tabela se necessário
+            if (tab_buscarSimboloLocal(node->data.class_decl.name) == NULL) {
+                tab_inserirSimbolo(node->data.class_decl.name, "class");
+            }
+
+            // Atualiza Aridade da Classe baseada no método 'init'
+            Simbolo *sClass = tab_buscarSimbolo(node->data.class_decl.name);
+            if (sClass) {
+                sClass->numParams = 0; // Default: construtor sem argumentos
+                for (NoAST *m = node->data.class_decl.methods; m; m = m->next) {
+                    if (strcmp(m->data.fun_decl.name, "init") == 0) {
+                        sClass->numParams = contarNos(m->data.fun_decl.params);
+                        break;
+                    }
+                }
+            }
+
             // Entra no escopo da classe
             tab_entrarEscopo();
+            
+            // [NOVO] Inserir 'this' no escopo
+             // tab_inserirSimbolo("this", "instance");
+
             // Percorre os métodos passando o contexto de CLASSE
             for (NoAST *m = node->data.class_decl.methods; m; m = m->next) {
                 visitarNo(m, CTX_FUNC_METHOD, CTX_CLASS_CLASS);
             }
             tab_sairEscopo();
             break;
+        }
 
         case NODE_PRINT_STMT:
             visitarNo(node->data.print_stmt.expression, funcType, classType);
@@ -129,8 +194,7 @@ static void visitarStatement(NoAST *node, FunctionType funcType, ClassType class
             break;
 
         case NODE_BLOCK:
-            // Simula a entrada de escopo para que 'tab_buscarSimbolo'
-            // encontre as variáveis locais criadas pelo parser.
+            // Simula a entrada de escopo
             tab_entrarEscopo();
             for (NoAST *s = node->data.block.statements; s; s = s->next) {
                 visitarNo(s, funcType, classType);
@@ -197,6 +261,27 @@ static void visitarExpressao(NoAST *node, FunctionType funcType, ClassType class
             visitarNo(node->data.call.target, funcType, classType);
             for (NoAST *a = node->data.call.arguments; a; a = a->next) {
                 visitarNo(a, funcType, classType);
+            }
+
+            // VERIFICAÇÃO DE ARIDADE (Chamadas de Identificadores)
+            if (node->data.call.target->type == NODE_IDENTIFIER) {
+                char *nomeFunc = node->data.call.target->data.identifier;
+                Simbolo *s = tab_buscarSimbolo(nomeFunc);
+                
+                if (s) {
+                    // Verifica se é chamável (fun ou class)
+                    int isCallable = (strcmp(s->tipo, "fun") == 0 || strcmp(s->tipo, "class") == 0);
+                    
+                    if (!isCallable) {
+                         // Pode adicionar aviso se chamar variável comum
+                    } else if (s->numParams != -1) { // Se numParams for -1, ignoramos
+                        int numArgs = contarNos(node->data.call.arguments);
+                        if (numArgs != s->numParams) {
+                            fprintf(stderr, "Erro Semantico (linha %d): Funcao '%s' esperava %d argumentos, mas recebeu %d.\n", 
+                                node->lineno, nomeFunc, s->numParams, numArgs);
+                        }
+                    }
+                }
             }
             break;
         

@@ -101,6 +101,7 @@ void tab_inserirSimbolo(char *nome, char *tipo) {
     novo->tipo[sizeof(novo->tipo) - 1] = '\0';
     
     novo->escopo = escopoAtual;
+    novo->numParams = -1;
 
     unsigned int index = hash(nome);
     novo->prox = tabela_hash[index];
