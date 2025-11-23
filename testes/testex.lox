@@ -1,0 +1,82 @@
+// ============================================================
+// ARQUIVO: testes/teste_semantica.lox
+// OBJETIVO: Validar contextos (return, this) e avisos de tipos
+// ============================================================
+
+print "--- INICIO DOS TESTES SEMANTICOS ---";
+
+// ------------------------------------------------------------
+// PARTE 1: CÓDIGO CORRETO (Não deve gerar erros/avisos)
+// ------------------------------------------------------------
+print "1. Testando operacoes validas...";
+
+var num1 = 10;
+var num2 = 20.5;
+var str1 = "Ola ";
+var str2 = "Mundo";
+
+// Operacoes numericas e de string validas
+var somaNum = num1 + num2;
+var catStr = str1 + str2;
+var comp = num1 < num2;
+
+fun funcaoValida(p) {
+    if (p > 0) {
+        return p; // OK: Return dentro de funcao
+    }
+    return 0; 
+}
+
+class ClasseValida {
+    init(nome) {
+        this.nome = nome; // OK: 'this' dentro de classe
+        return;           // OK: Return vazio no init
+    }
+
+    metodo() {
+        print this.nome;
+    }
+}
+
+// ------------------------------------------------------------
+// PARTE 2: ERROS DE CONTEXTO (Devem gerar 'Erro Semantico')
+// ------------------------------------------------------------
+print "2. Testando Erros de Contexto (Espere mensagens de erro abaixo)...";
+
+// ERRO 1: Return fora de função
+return "erro global"; 
+
+// ERRO 2: This fora de classe
+print this;
+
+class ClasseErro {
+    init() {
+        // ERRO 3: Return com valor dentro de init
+        return 10; 
+    }
+}
+
+// ------------------------------------------------------------
+// PARTE 3: AVISOS DE TIPO (Devem gerar 'AVISO Semantico')
+// ------------------------------------------------------------
+print "3. Testando Avisos de Tipos (Espere avisos abaixo)...";
+
+var n = 10;
+var s = "texto";
+var b = true;
+
+// AVISO 1: Soma incompatível (Int + String)
+var aviso1 = n + s; 
+
+// AVISO 2: Subtração com String
+var aviso2 = s - n; 
+
+// AVISO 3: Multiplicação com Booleano
+var aviso3 = b * 5;
+
+// AVISO 4: Comparação incompatível (String > Int)
+if (s > n) {
+    print "Isso eh estranho";
+}
+
+print "--- FIM DOS TESTES ---";

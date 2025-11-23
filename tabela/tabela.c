@@ -26,7 +26,13 @@ void tab_entrarEscopo() {
 }
 
 void tab_sairEscopo() {
-    /* if (escopoAtual < 0) return;
+    if (escopoAtual < 0) return;
+
+    // Debug
+
+    // printf("\n>>> Saindo do Escopo %d. Estado da Tabela antes da limpeza:\n", escopoAtual);
+    // tab_imprimirTabela(); 
+    // printf(">>> Fim do estado do Escopo %d\n\n", escopoAtual);
 
     for (int i = 0; i < TAM_HASH; i++) {
         Simbolo *atual = tabela_hash[i];
@@ -47,8 +53,8 @@ void tab_sairEscopo() {
                 atual = atual->prox;
             }
         }
-    }*/
-    if (escopoAtual <= 0) return;
+    }
+    // if (escopoAtual <= 0) return;
     escopoAtual--;
 }
 

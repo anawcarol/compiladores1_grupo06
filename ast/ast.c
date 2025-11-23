@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include "../parser/parser.tab.h"
+#include "../tabela/tabela.h"
 
 static NoAST* criarNoBase(NodeType type) {
     NoAST *node = (NoAST*) malloc(sizeof(NoAST));
@@ -181,6 +182,7 @@ NoAST *criarNoParam(char *name) {
 }
 
 // Retorna uma string representando o tipo do nó para a Tabela de Símbolos
+
 char* obterNomeTipo(NoAST *no) {
     if (no == NULL) return "nil";
 
@@ -199,11 +201,24 @@ char* obterNomeTipo(NoAST *no) {
 
         case NODE_NIL:
             return "nil";
+
+        case NODE_IDENTIFIER: {
+            // AQUI ESTÁ A CORREÇÃO:
+            // Buscamos o símbolo na tabela para saber qual tipo foi declarado
+            Simbolo *s = tab_buscarSimbolo(no->data.identifier);
+            if (s != NULL) {
+                return s->tipo; // Retorna "int", "float", "string", etc.
+            }
+            // Se não achar (erro de variável não declarada tratado noutro lugar),
+            // retorna dynamic para evitar crashes.
+            return "dynamic";
+        }
             
         default:
             return "dynamic"; 
     }
 }
+
 // ------------------------------
 
 
