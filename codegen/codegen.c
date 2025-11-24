@@ -119,6 +119,32 @@ static char* visitarExpressao(NoAST *node) {
             return result;
         }
 
+        case NODE_THIS:
+            return strdup("this");
+
+        case NODE_GET_ATTR: {
+            char *obj = visitarExpressao(node->data.get_attr.object);
+            char *res = gerarTemp();
+            
+            emit(TAC_GET_ATTR, res, obj, node->data.get_attr.name);
+            
+            free(obj);
+            return res;
+        }
+
+        case NODE_SET_ATTR: {
+            char *obj = visitarExpressao(node->data.set_attr.object);
+            char *val = visitarExpressao(node->data.set_attr.value);
+            
+            emit(TAC_SET_ATTR, obj, node->data.set_attr.name, val);
+            
+            char *retorno = strdup(val);
+            
+            free(obj);
+            free(val);
+            return retorno;
+        }
+
         default:
             return NULL;
     }
@@ -223,13 +249,10 @@ static void visitarStatement(NoAST *node) {
         }
 
         case NODE_FUN_DECL: {
-            char *label_func = gerarLabel();
-            emit(TAC_LABEL, label_func, NULL, NULL);
-            
-            // Processar corpo da função
-            visitarStatement(node->data.fun_decl.body);
-            // Não emitir return automático para manter simples
-            break;
+             emit(TAC_LABEL, node->data.fun_decl.name, NULL, NULL);
+             visitarStatement(node->data.fun_decl.body);
+             emit(TAC_RETURN, NULL, NULL, NULL);
+             break;
         }
 
         case NODE_RETURN_STMT: {
@@ -239,6 +262,25 @@ static void visitarStatement(NoAST *node) {
             }
             emit(TAC_RETURN, ret_val, NULL, NULL);
             if (ret_val) free(ret_val);
+            break;
+        }
+
+        case NODE_CLASS_DECL: {
+            NoAST *metodo = node->data.class_decl.methods;
+            while (metodo) {
+                char labelMetodo[128];
+                sprintf(labelMetodo, "%s_%s", 
+                        node->data.class_decl.name, 
+                        metodo->data.fun_decl.name);
+                
+                emit(TAC_LABEL, labelMetodo, NULL, NULL);
+                
+                visitarStatement(metodo->data.fun_decl.body);
+                
+                emit(TAC_RETURN, NULL, NULL, NULL);
+                
+                metodo = metodo->next;
+            }
             break;
         }
 

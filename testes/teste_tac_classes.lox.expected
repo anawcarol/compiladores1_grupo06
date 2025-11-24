@@ -1,0 +1,72 @@
+Analise sintatica concluida com sucesso!
+
+--- Iniciando Analise Semantica ---
+--- Analise Semantica Concluida ---
+
+--- Arvore Sintatica Abstrata ---
+ClassDecl: Box
+  Methods:
+    FunDecl: init
+      Params:
+        Param: val
+      Body:
+        Block
+          ExprStmt
+            SetAttr: val
+              Object:
+                This
+              Value:
+                Ident: val
+    FunDecl: retornaValor
+      Params:
+      Body:
+        Block
+          ReturnStmt
+            GetAttr: val
+              Object:
+                This
+VarDecl: b
+  Call
+    Target:
+      Ident: Box
+    Args:
+      Num: 10.000000
+ExprStmt
+  SetAttr: val
+    Object:
+      Ident: b
+    Value:
+      Num: 20.000000
+PrintStmt
+  Call
+    Target:
+      GetAttr: retornaValor
+        Object:
+          Ident: b
+    Args:
+---------------------------------
+
+--- Tabela de Símbolos (Visão Hash) ---
+Bucket 51:
+  -> Nome: Box, Tipo: class, Escopo: 0
+Bucket 98:
+  -> Nome: b, Tipo: var, Escopo: 0
+---------------------------------------
+
+--- Gerando Codigo Intermediario (TAC) ---
+Box_init:
+this.val = val
+return
+Box_retornaValor:
+t0 = this.val
+return t0
+return
+param 10.00
+t1 = call Box
+b = t1
+b.val = 20.00
+t2 = b.retornaValor
+t3 = call t2
+param t3
+call print
+------------------------------------------

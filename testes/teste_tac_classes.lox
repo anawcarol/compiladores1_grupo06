@@ -1,0 +1,14 @@
+// Teste para verificação de geração de TAC com Classes
+class Box {
+  init(val) {
+    this.val = val;
+  }
+
+  retornaValor() {
+    return this.val;
+  }
+}
+
+var b = Box(10);
+b.val = 20;
+print b.retornaValor();

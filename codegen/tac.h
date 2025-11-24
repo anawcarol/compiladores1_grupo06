@@ -6,7 +6,6 @@
 typedef enum {
     TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, 
     TAC_COPY,
-    // Novas operações
     TAC_EQ, TAC_NEQ, TAC_GT, TAC_GE, TAC_LT, TAC_LE,
     TAC_AND, TAC_OR, TAC_NOT,
     TAC_NEG,
@@ -16,7 +15,9 @@ typedef enum {
     TAC_JUMP_FALSE,
     TAC_CALL,
     TAC_RETURN,
-    TAC_PARAM
+    TAC_PARAM,
+    TAC_GET_ATTR,
+    TAC_SET_ATTR
 } TacOp;
 
 typedef struct TacNode {
