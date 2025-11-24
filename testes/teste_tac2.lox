@@ -1,0 +1,39 @@
+// Teste de operações lógicas e comparação
+var a = 10;
+var b = 20;
+var resultado = a > b;
+var resultado2 = a == 10;
+
+// Teste de if/else
+if (a > b) {
+    print "a é maior que b";
+} else {
+    print "a é menor ou igual a b";
+}
+
+// Teste de while
+var contador = 0;
+while (contador < 3) {
+    print "Contador: ";
+    print contador;
+    contador = contador + 1;
+}
+
+// Teste de for
+for (var i = 0; i < 2; i = i + 1) {
+    print "For loop: ";
+    print i;
+}
+
+// Teste de operações lógicas
+var x = true;
+var y = false;
+var z = x and y;
+var w = x or y;
+
+// Teste de função simples
+fun saudacao() {
+    print "Olá mundo!";
+}
+
+saudacao();

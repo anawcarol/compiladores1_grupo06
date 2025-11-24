@@ -5,7 +5,18 @@
 
 typedef enum {
     TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, 
-    TAC_COPY,       
+    TAC_COPY,
+    // Novas operações
+    TAC_EQ, TAC_NEQ, TAC_GT, TAC_GE, TAC_LT, TAC_LE,
+    TAC_AND, TAC_OR, TAC_NOT,
+    TAC_NEG,
+    TAC_LABEL,
+    TAC_JUMP,
+    TAC_JUMP_TRUE,
+    TAC_JUMP_FALSE,
+    TAC_CALL,
+    TAC_RETURN,
+    TAC_PARAM
 } TacOp;
 
 typedef struct TacNode {
@@ -25,5 +36,6 @@ void liberarTac(TacNode *head);
 
 // Gerador de temporários (t0, t1...)
 char* gerarTemp();
+char* gerarLabel();
 
 #endif
