@@ -1,0 +1,21 @@
+
+var a = 10;
+var b = 5;
+
+// 2. Precedência (Multiplicação antes de Soma)
+// Esperado: t0 = b * 2; t1 = a + t0; c = t1;
+var c = a + b * 2;
+
+// 3. Agrupamento (Parênteses alteram precedência)
+// Esperado: t2 = a + b; t3 = t2 * 2; d = t3;
+var d = (a + b) * 2;
+
+// 4. Operações com variáveis já definidas e números
+// Esperado: t4 = c / b; t5 = t4 - 1; x = t5;
+var x = c / b - 1;
+
+// 5. Reatribuição
+// Esperado: t6 = x + 10; a = t6;
+a = x + 10;
+
+x = 1 + 2 * 3 - 4;

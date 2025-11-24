@@ -9,6 +9,9 @@ AST_C = ast/ast.c
 TABELA_C = tabela/tabela.c
 SEMANTICA_C = semantica/semantica.c
 
+# Arquivos do Gerador de Código
+CODEGEN_C = codegen/tac.c codegen/codegen.c
+
 LEXER_C = lexer/lex.yy.c
 PARSER_C = parser/parser.tab.c
 PARSER_H = parser/parser.tab.h
@@ -16,6 +19,7 @@ PARSER_O = parser/parser.output
 
 CC = gcc
 CFLAGS = -Wall -g
+
 # Adicionar a biblioteca matemática (-lm) para o 'atof' no lexer
 LDFLAGS = -lm
 
@@ -31,8 +35,8 @@ $(LEXER_C): $(LEXER) $(PARSER_H)
 	flex -o $(LEXER_C) $(LEXER)
 
 # Compilação do compilador
-$(TARGET): $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C)
-	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(LDFLAGS)
+$(TARGET): $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(CODEGEN_C)
+	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(CODEGEN_C) $(LDFLAGS)
 
 # Alvo para rodar os testes
 test: $(TARGET)

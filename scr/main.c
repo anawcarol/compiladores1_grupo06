@@ -4,6 +4,7 @@
 #include "../ast/ast.h"
 #include "../tabela/tabela.h"
 #include "../semantica/semantica.h"
+#include "../codegen/codegen.h"
 
 int yyparse(void);
 extern FILE* yyin;
@@ -41,6 +42,13 @@ int main(int argc, char** argv) {
         printf("---------------------------------\n");
         
         tab_imprimirTabela();
+
+        // TAC
+        printf("\n--- Gerando Codigo Intermediario (TAC) ---\n");
+        TacNode *codigo = gerarCodigo(ast_root);
+        imprimirTac(codigo);
+        liberarTac(codigo);
+        printf("------------------------------------------\n");
         
         NoAST *node = ast_root;
         while (node) {
