@@ -6,16 +6,20 @@
 typedef enum {
     TAC_ADD, TAC_SUB, TAC_MUL, TAC_DIV, 
     TAC_COPY,
+    // Operações lógicas e comparativas
     TAC_EQ, TAC_NEQ, TAC_GT, TAC_GE, TAC_LT, TAC_LE,
     TAC_AND, TAC_OR, TAC_NOT,
     TAC_NEG,
+    // Controle de fluxo
     TAC_LABEL,
     TAC_JUMP,
     TAC_JUMP_TRUE,
     TAC_JUMP_FALSE,
+    // Funções
     TAC_CALL,
     TAC_RETURN,
     TAC_PARAM,
+    // OPCODES PARA OO
     TAC_GET_ATTR,
     TAC_SET_ATTR
 } TacOp;

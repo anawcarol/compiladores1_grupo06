@@ -8,65 +8,97 @@ ClassDecl: Box
   Methods:
     FunDecl: init
       Params:
-        Param: val
+        Param: valorInicial
       Body:
         Block
           ExprStmt
-            SetAttr: val
+            SetAttr: conteudo
               Object:
                 This
               Value:
-                Ident: val
-    FunDecl: retornaValor
+                Ident: valorInicial
+    FunDecl: getConteudo
       Params:
       Body:
         Block
           ReturnStmt
-            GetAttr: val
+            GetAttr: conteudo
               Object:
                 This
-VarDecl: b
+    FunDecl: setConteudo
+      Params:
+        Param: novoValor
+      Body:
+        Block
+          ExprStmt
+            SetAttr: conteudo
+              Object:
+                This
+              Value:
+                Ident: novoValor
+VarDecl: caixa
   Call
     Target:
       Ident: Box
     Args:
-      Num: 10.000000
-ExprStmt
-  SetAttr: val
-    Object:
-      Ident: b
-    Value:
-      Num: 20.000000
+      Num: 100.000000
 PrintStmt
   Call
     Target:
-      GetAttr: retornaValor
+      GetAttr: getConteudo
         Object:
-          Ident: b
+          Ident: caixa
     Args:
+ExprStmt
+  Call
+    Target:
+      GetAttr: setConteudo
+        Object:
+          Ident: caixa
+    Args:
+      Num: 200.000000
+ExprStmt
+  SetAttr: conteudo
+    Object:
+      Ident: caixa
+    Value:
+      Num: 300.000000
+PrintStmt
+  GetAttr: conteudo
+    Object:
+      Ident: caixa
 ---------------------------------
 
 --- Tabela de Símbolos (Visão Hash) ---
+Bucket 8:
+  -> Nome: caixa, Tipo: var, Escopo: 0
 Bucket 51:
   -> Nome: Box, Tipo: class, Escopo: 0
-Bucket 98:
-  -> Nome: b, Tipo: var, Escopo: 0
 ---------------------------------------
 
 --- Gerando Codigo Intermediario (TAC) ---
 Box_init:
-this.val = val
+this.conteudo = valorInicial
 return
-Box_retornaValor:
-t0 = this.val
+Box_getConteudo:
+t0 = this.conteudo
 return t0
 return
-param 10.00
+Box_setConteudo:
+this.conteudo = novoValor
+return
+param 100.00
 t1 = call Box
-b = t1
-b.val = 20.00
-t2 = b.retornaValor
+caixa = t1
+t2 = caixa.getConteudo
 t3 = call t2
 param t3
+call print
+param 200.00
+t4 = caixa.setConteudo
+t5 = call t4
+caixa.conteudo = 300.00
+t6 = caixa.conteudo
+param t6
 call print
 ------------------------------------------

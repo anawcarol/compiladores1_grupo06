@@ -1,14 +1,24 @@
-// Teste para verificação de geração de TAC com Classes
+// Teste focado na Geracao de TAC para Classes e Objetos
+
 class Box {
-  init(val) {
-    this.val = val;
+  init(valorInicial) {
+    this.conteudo = valorInicial;
   }
 
-  retornaValor() {
-    return this.val;
+  getConteudo() {
+    return this.conteudo;
+  }
+
+  setConteudo(novoValor) {
+    this.conteudo = novoValor;
   }
 }
 
-var b = Box(10);
-b.val = 20;
-print b.retornaValor();
+var caixa = Box(100);
+
+print caixa.getConteudo();
+
+caixa.setConteudo(200);
+
+caixa.conteudo = 300;
+print caixa.conteudo;

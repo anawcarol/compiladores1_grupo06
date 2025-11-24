@@ -65,6 +65,7 @@ const char* tacOpToString(TacOp op) {
         case TAC_CALL: return "call";
         case TAC_RETURN: return "return";
         case TAC_PARAM: return "param";
+        // --- NOVOS OPCODES PARA OO ---
         case TAC_GET_ATTR: return ".";
         case TAC_SET_ATTR: return "=";
         default: return "?";
@@ -107,16 +108,15 @@ void imprimirTac(TacNode *head) {
             case TAC_PARAM:
                 printf("param %s\n", atual->res);
                 break;
-            case TAC_NOT:
-            case TAC_NEG:
-                printf("%s = %s %s\n", atual->res, tacOpToString(atual->op), atual->arg1);
-                break;
             case TAC_GET_ATTR:
                 printf("%s = %s.%s\n", atual->res, atual->arg1, atual->arg2);
                 break;
-                
             case TAC_SET_ATTR:
                 printf("%s.%s = %s\n", atual->res, atual->arg1, atual->arg2);
+                break;
+            case TAC_NOT:
+            case TAC_NEG:
+                printf("%s = %s %s\n", atual->res, tacOpToString(atual->op), atual->arg1);
                 break;
             default:
                 if (atual->arg2)

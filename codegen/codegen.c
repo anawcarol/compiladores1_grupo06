@@ -32,6 +32,31 @@ static char* visitarExpressao(NoAST *node) {
         case NODE_IDENTIFIER:
             return strdup(node->data.identifier);
 
+        case NODE_THIS:
+            return strdup("this");
+
+        case NODE_GET_ATTR: {
+            char *obj = visitarExpressao(node->data.get_attr.object);
+            char *res = gerarTemp();
+            
+            emit(TAC_GET_ATTR, res, obj, node->data.get_attr.name);
+            
+            free(obj);
+            return res;
+        }
+
+        case NODE_SET_ATTR: {
+            char *obj = visitarExpressao(node->data.set_attr.object);
+            char *val = visitarExpressao(node->data.set_attr.value);
+            
+            emit(TAC_SET_ATTR, obj, node->data.set_attr.name, val);
+            
+            char *retorno = strdup(val);
+            
+            free(obj); free(val);
+            return retorno;
+        }
+
         case NODE_BINARY_OP: {
             char *t1 = visitarExpressao(node->data.binary_op.left);
             char *t2 = visitarExpressao(node->data.binary_op.right);
@@ -117,32 +142,6 @@ static char* visitarExpressao(NoAST *node) {
             emit(TAC_CALL, result, func, NULL);
             free(func);
             return result;
-        }
-
-        case NODE_THIS:
-            return strdup("this");
-
-        case NODE_GET_ATTR: {
-            char *obj = visitarExpressao(node->data.get_attr.object);
-            char *res = gerarTemp();
-            
-            emit(TAC_GET_ATTR, res, obj, node->data.get_attr.name);
-            
-            free(obj);
-            return res;
-        }
-
-        case NODE_SET_ATTR: {
-            char *obj = visitarExpressao(node->data.set_attr.object);
-            char *val = visitarExpressao(node->data.set_attr.value);
-            
-            emit(TAC_SET_ATTR, obj, node->data.set_attr.name, val);
-            
-            char *retorno = strdup(val);
-            
-            free(obj);
-            free(val);
-            return retorno;
         }
 
         default:
@@ -249,19 +248,10 @@ static void visitarStatement(NoAST *node) {
         }
 
         case NODE_FUN_DECL: {
-             emit(TAC_LABEL, node->data.fun_decl.name, NULL, NULL);
-             visitarStatement(node->data.fun_decl.body);
-             emit(TAC_RETURN, NULL, NULL, NULL);
-             break;
-        }
-
-        case NODE_RETURN_STMT: {
-            char *ret_val = NULL;
-            if (node->data.return_stmt.expression) {
-                ret_val = visitarExpressao(node->data.return_stmt.expression);
-            }
-            emit(TAC_RETURN, ret_val, NULL, NULL);
-            if (ret_val) free(ret_val);
+            char *label_func = gerarLabel();
+            emit(TAC_LABEL, label_func, NULL, NULL);
+            
+            visitarStatement(node->data.fun_decl.body);
             break;
         }
 
@@ -274,13 +264,23 @@ static void visitarStatement(NoAST *node) {
                         metodo->data.fun_decl.name);
                 
                 emit(TAC_LABEL, labelMetodo, NULL, NULL);
-                
+
                 visitarStatement(metodo->data.fun_decl.body);
                 
                 emit(TAC_RETURN, NULL, NULL, NULL);
                 
                 metodo = metodo->next;
             }
+            break;
+        }
+
+        case NODE_RETURN_STMT: {
+            char *ret_val = NULL;
+            if (node->data.return_stmt.expression) {
+                ret_val = visitarExpressao(node->data.return_stmt.expression);
+            }
+            emit(TAC_RETURN, ret_val, NULL, NULL);
+            if (ret_val) free(ret_val);
             break;
         }
 
