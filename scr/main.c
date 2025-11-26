@@ -5,10 +5,10 @@
 #include "../tabela/tabela.h"
 #include "../semantica/semantica.h"
 #include "../codegen/codegen.h"
+#include "../backend/backend_c.h"
 
 int yyparse(void);
 extern FILE* yyin;
-
 extern NoAST *ast_root;
 
 int main(int argc, char** argv) {
@@ -27,38 +27,16 @@ int main(int argc, char** argv) {
     int ret = yyparse();
 
     if (ret == 0) {
-        printf("Analise sintatica concluida com sucesso!\n\n");
-        
-        printf("--- Iniciando Analise Semantica ---\n");
         resolver(ast_root);
-        printf("--- Analise Semantica Concluida ---\n\n");
 
-        printf("--- Arvore Sintatica Abstrata ---\n");
-
-        for (NoAST *node = ast_root; node; node = node->next) {
-            imprimirAST(node, 0);
-        }
-
-        printf("---------------------------------\n");
-        
-        tab_imprimirTabela();
-
-        // TAC
-        printf("\n--- Gerando Codigo Intermediario (TAC) ---\n");
         TacNode *codigo = gerarCodigo(ast_root);
-        imprimirTac(codigo);
+        
+        gerarCodigoC(codigo);
+
         liberarTac(codigo);
-        printf("------------------------------------------\n");
-        
-        NoAST *node = ast_root;
-        while (node) {
-            NoAST *proximo = node->next;
-            liberarAST(node);
-            node = proximo;
-        }
-        
+        liberarAST(ast_root);
     } else {
-        printf("\nFalha na analise sintatica.\n");
+        fprintf(stderr, "Falha na analise.\n");
     }
 
     fclose(yyin);

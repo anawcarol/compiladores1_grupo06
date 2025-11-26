@@ -6,8 +6,6 @@
 
 static TacNode *head = NULL;
 static TacNode *tail = NULL;
-
-// Variáveis globais para contadores
 int tempCount = 0;
 int labelCount = 0;
 
@@ -21,47 +19,37 @@ static char* visitarExpressao(NoAST *node) {
 
     switch (node->type) {
         case NODE_NUM: {
-            char buffer[32];
-            sprintf(buffer, "%.2f", node->data.number);
+            char buffer[32]; sprintf(buffer, "%.2f", node->data.number);
             return strdup(buffer);
         }
-        case NODE_STRING:
-            return strdup(node->data.string);
-        case NODE_BOOL:
-            return strdup(node->data.boolean ? "true" : "false");
-        case NODE_IDENTIFIER:
-            return strdup(node->data.identifier);
-
-        case NODE_THIS:
-            return strdup("this");
+        case NODE_STRING: {
+            char buffer[256]; sprintf(buffer, "\"%s\"", node->data.string);
+            return strdup(buffer);
+        }
+        case NODE_BOOL: return strdup(node->data.boolean ? "true" : "false");
+        case NODE_IDENTIFIER: return strdup(node->data.identifier);
+        case NODE_THIS: return strdup("this");
 
         case NODE_GET_ATTR: {
             char *obj = visitarExpressao(node->data.get_attr.object);
             char *res = gerarTemp();
-            
-            emit(TAC_GET_ATTR, res, obj, node->data.get_attr.name);
-            
-            free(obj);
-            return res;
+            char attrName[128]; sprintf(attrName, "\"%s\"", node->data.get_attr.name);
+            emit(TAC_GET_ATTR, res, obj, attrName);
+            free(obj); return res;
         }
 
         case NODE_SET_ATTR: {
             char *obj = visitarExpressao(node->data.set_attr.object);
             char *val = visitarExpressao(node->data.set_attr.value);
-            
-            emit(TAC_SET_ATTR, obj, node->data.set_attr.name, val);
-            
-            char *retorno = strdup(val);
-            
-            free(obj); free(val);
-            return retorno;
+            char attrName[128]; sprintf(attrName, "\"%s\"", node->data.set_attr.name);
+            emit(TAC_SET_ATTR, obj, attrName, val);
+            char *ret = strdup(val); free(obj); free(val); return ret;
         }
 
         case NODE_BINARY_OP: {
             char *t1 = visitarExpressao(node->data.binary_op.left);
             char *t2 = visitarExpressao(node->data.binary_op.right);
             char *tRes = gerarTemp();
-            
             TacOp op = TAC_ADD;
             switch(node->data.binary_op.op) {
                 case PLUS: op = TAC_ADD; break;
@@ -75,230 +63,163 @@ static char* visitarExpressao(NoAST *node) {
                 case EQUAL_EQUAL: op = TAC_EQ; break;
                 case BANG_EQUAL: op = TAC_NEQ; break;
             }
-            
             emit(op, tRes, t1, t2);
-            free(t1); free(t2);
-            return tRes;
+            free(t1); free(t2); return tRes;
         }
 
         case NODE_UNARY_OP: {
             char *t1 = visitarExpressao(node->data.unary_op.operand);
             char *tRes = gerarTemp();
-            
-            TacOp op;
-            switch(node->data.unary_op.op) {
-                case MINUS: op = TAC_NEG; break;
-                case BANG: op = TAC_NOT; break;
-                default: op = TAC_COPY; break;
-            }
-            
+            TacOp op = (node->data.unary_op.op == MINUS) ? TAC_NEG : TAC_NOT;
             emit(op, tRes, t1, NULL);
-            free(t1);
-            return tRes;
+            free(t1); return tRes;
         }
 
         case NODE_LOGICAL_OP: {
             char *t1 = visitarExpressao(node->data.binary_op.left);
             char *t2 = visitarExpressao(node->data.binary_op.right);
             char *tRes = gerarTemp();
-            
-            TacOp op;
-            if (node->data.binary_op.op == OR) {
-                op = TAC_OR;
-            } else {
-                op = TAC_AND;
-            }
-            
+            TacOp op = (node->data.binary_op.op == OR) ? TAC_OR : TAC_AND;
             emit(op, tRes, t1, t2);
-            free(t1); free(t2);
-            return tRes;
+            free(t1); free(t2); return tRes;
         }
 
         case NODE_ASSIGN: {
             char *val = visitarExpressao(node->data.assign.value);
             emit(TAC_COPY, node->data.assign.name, val, NULL);
-            free(val);
-            return strdup(node->data.assign.name);
+            free(val); return strdup(node->data.assign.name);
         }
 
         case NODE_CALL: {
             char *func = visitarExpressao(node->data.call.target);
-            
-            // Processar argumentos
             NoAST *arg = node->data.call.arguments;
             while (arg) {
-                char *arg_val = visitarExpressao(arg);
-                emit(TAC_PARAM, arg_val, NULL, NULL);
-                free(arg_val);
-                arg = arg->next;
+                char *av = visitarExpressao(arg);
+                emit(TAC_PARAM, av, NULL, NULL);
+                free(av); arg = arg->next;
             }
-            
-            // Para funções que retornam valor, criar temporário
-            char *result = NULL;
-            if (strcmp(func, "print") != 0) {
-                result = gerarTemp();
-            }
-            
-            emit(TAC_CALL, result, func, NULL);
-            free(func);
-            return result;
+            char *res = NULL;
+            if (strcmp(func, "print") != 0) res = gerarTemp();
+            emit(TAC_CALL, res, func, NULL);
+            free(func); return res;
         }
-
-        default:
-            return NULL;
+        default: return NULL;
     }
 }
 
 static void visitarStatement(NoAST *node) {
     if (!node) return;
-
     switch (node->type) {
         case NODE_BLOCK:
-            for (NoAST *s = node->data.block.statements; s; s = s->next)
+            // CORREÇÃO AQUI: visitingStatement -> visitarStatement
+            for (NoAST *s = node->data.block.statements; s; s = s->next) 
                 visitarStatement(s);
             break;
 
         case NODE_VAR_DECL:
             if (node->data.var_decl.initializer) {
-                char *val = visitarExpressao(node->data.var_decl.initializer);
-                emit(TAC_COPY, node->data.var_decl.name, val, NULL);
-                free(val);
+                 char *v = visitarExpressao(node->data.var_decl.initializer);
+                 emit(TAC_COPY, node->data.var_decl.name, v, NULL); free(v);
             }
             break;
-
-        case NODE_EXPR_STMT: {
-            char *res = visitarExpressao(node->data.expr_stmt.expression);
-            if (res) free(res);
-            break;
-        }
-
         case NODE_PRINT_STMT: {
-            char *res = visitarExpressao(node->data.print_stmt.expression);
-            emit(TAC_PARAM, res, NULL, NULL);
-            emit(TAC_CALL, NULL, "print", NULL);
-            free(res);
+            char *r = visitarExpressao(node->data.print_stmt.expression);
+            emit(TAC_CALL, NULL, "print", r); free(r);
             break;
         }
-
+        case NODE_EXPR_STMT: { char* r = visitarExpressao(node->data.expr_stmt.expression); if(r) free(r); break; }
+        
         case NODE_IF_STMT: {
             char *cond = visitarExpressao(node->data.if_stmt.condition);
-            char *label_else = gerarLabel();
-            char *label_end = gerarLabel();
-            
-            emit(TAC_JUMP_FALSE, label_else, cond, NULL);
+            char *l_else = gerarLabel(); char *l_end = gerarLabel();
+            emit(TAC_JUMP_FALSE, l_else, cond, NULL);
             visitarStatement(node->data.if_stmt.then_branch);
-            
-            if (node->data.if_stmt.else_branch) {
-                emit(TAC_JUMP, label_end, NULL, NULL);
-                emit(TAC_LABEL, label_else, NULL, NULL);
-                visitarStatement(node->data.if_stmt.else_branch);
-                emit(TAC_LABEL, label_end, NULL, NULL);
-            } else {
-                emit(TAC_LABEL, label_else, NULL, NULL);
-            }
-            
-            free(cond);
-            break;
+            emit(TAC_JUMP, l_end, NULL, NULL);
+            emit(TAC_LABEL, l_else, NULL, NULL);
+            if (node->data.if_stmt.else_branch) visitarStatement(node->data.if_stmt.else_branch);
+            emit(TAC_LABEL, l_end, NULL, NULL);
+            free(cond); break;
         }
-
         case NODE_WHILE_STMT: {
-            char *label_start = gerarLabel();
-            char *label_end = gerarLabel();
-            
-            emit(TAC_LABEL, label_start, NULL, NULL);
-            char *cond = visitarExpressao(node->data.while_stmt.condition);
-            emit(TAC_JUMP_FALSE, label_end, cond, NULL);
-            visitarStatement(node->data.while_stmt.body);
-            emit(TAC_JUMP, label_start, NULL, NULL);
-            emit(TAC_LABEL, label_end, NULL, NULL);
-            
-            free(cond);
-            break;
+             char *l_start = gerarLabel(); char *l_end = gerarLabel();
+             emit(TAC_LABEL, l_start, NULL, NULL);
+             char *cond = visitarExpressao(node->data.while_stmt.condition);
+             emit(TAC_JUMP_FALSE, l_end, cond, NULL);
+             visitarStatement(node->data.while_stmt.body);
+             emit(TAC_JUMP, l_start, NULL, NULL);
+             emit(TAC_LABEL, l_end, NULL, NULL);
+             free(cond); break;
         }
-
         case NODE_FOR_STMT: {
-            // Inicialização
-            if (node->data.for_stmt.initializer)
-                visitarStatement(node->data.for_stmt.initializer);
-            
+            if (node->data.for_stmt.initializer) visitarStatement(node->data.for_stmt.initializer);
             char *label_start = gerarLabel();
             char *label_end = gerarLabel();
-            
             emit(TAC_LABEL, label_start, NULL, NULL);
-            
-            // Condição
             if (node->data.for_stmt.condition) {
                 char *cond = visitarExpressao(node->data.for_stmt.condition);
                 emit(TAC_JUMP_FALSE, label_end, cond, NULL);
                 free(cond);
             }
-            
-            // Corpo
             visitarStatement(node->data.for_stmt.body);
-            
-            // Incremento
             if (node->data.for_stmt.increment) {
                 char *inc = visitarExpressao(node->data.for_stmt.increment);
                 free(inc);
             }
-            
             emit(TAC_JUMP, label_start, NULL, NULL);
             emit(TAC_LABEL, label_end, NULL, NULL);
             break;
         }
-
+        
         case NODE_FUN_DECL: {
-            char *label_func = gerarLabel();
-            emit(TAC_LABEL, label_func, NULL, NULL);
-            
+            emit(TAC_LABEL, node->data.fun_decl.name, NULL, NULL);
+            for(NoAST* p=node->data.fun_decl.params; p; p=p->next) 
+                emit(TAC_COPY, p->data.identifier, "POP_PARAM", NULL);
             visitarStatement(node->data.fun_decl.body);
+            emit(TAC_RETURN, NULL, NULL, NULL);
             break;
         }
-
+        
         case NODE_CLASS_DECL: {
-            NoAST *metodo = node->data.class_decl.methods;
-            while (metodo) {
-                char labelMetodo[128];
-                sprintf(labelMetodo, "%s_%s", 
-                        node->data.class_decl.name, 
-                        metodo->data.fun_decl.name);
-                
-                emit(TAC_LABEL, labelMetodo, NULL, NULL);
-
-                visitarStatement(metodo->data.fun_decl.body);
-                
+            for(NoAST* m=node->data.class_decl.methods; m; m=m->next) {
+                char lbl[128]; sprintf(lbl, "%s_%s", node->data.class_decl.name, m->data.fun_decl.name);
+                emit(TAC_LABEL, lbl, NULL, NULL);
+                emit(TAC_COPY, "this", "POP_PARAM", NULL);
+                for(NoAST* p=m->data.fun_decl.params; p; p=p->next) 
+                    emit(TAC_COPY, p->data.identifier, "POP_PARAM", NULL);
+                visitarStatement(m->data.fun_decl.body);
                 emit(TAC_RETURN, NULL, NULL, NULL);
-                
-                metodo = metodo->next;
             }
             break;
         }
-
         case NODE_RETURN_STMT: {
-            char *ret_val = NULL;
-            if (node->data.return_stmt.expression) {
-                ret_val = visitarExpressao(node->data.return_stmt.expression);
-            }
-            emit(TAC_RETURN, ret_val, NULL, NULL);
-            if (ret_val) free(ret_val);
-            break;
+            char *rv = node->data.return_stmt.expression ? visitarExpressao(node->data.return_stmt.expression) : NULL;
+            emit(TAC_RETURN, rv, NULL, NULL); if(rv) free(rv); break;
         }
-
-        default:
-            break;
+        default: break;
     }
 }
 
 TacNode* gerarCodigo(NoAST *ast) {
-    head = NULL; 
-    tail = NULL;
-    tempCount = 0;
-    labelCount = 0;
+    head = NULL; tail = NULL; tempCount = 0; labelCount = 0;
     
-    NoAST *atual = ast;
-    while (atual) {
-        visitarStatement(atual);
-        atual = atual->next;
+    // Passo 1: Gerar apenas Classes e Funções
+    NoAST *curr = ast;
+    while (curr) {
+        if (curr->type == NODE_CLASS_DECL || curr->type == NODE_FUN_DECL) {
+            visitarStatement(curr);
+        }
+        curr = curr->next;
+    }
+
+    emit(TAC_LABEL, "main", NULL, NULL);
+
+    // Passo 2: Gerar o resto (Main Script)
+    curr = ast;
+    while (curr) {
+        if (curr->type != NODE_CLASS_DECL && curr->type != NODE_FUN_DECL) {
+            visitarStatement(curr);
+        }
+        curr = curr->next;
     }
     return head;
 }

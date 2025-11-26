@@ -1,0 +1,38 @@
+// Teste Final: Transpiler Lox -> C
+
+print "--- Tipos Basicos ---";
+var a = 10;
+var b = 20.5;
+print a + b;
+print "Ola " + "Mundo";
+print true;
+print nil;
+
+print "--- Controle de Fluxo ---";
+if (a < b) {
+    print "a eh menor";
+} else {
+    print "a nao eh menor";
+}
+
+var i = 0;
+while (i < 3) {
+    print i;
+    i = i + 1;
+}
+
+print "--- Objetos ---";
+class Pessoa {
+  init(nome) {
+    this.nome = nome;
+  }
+  digaOi() {
+    print "Oi, eu sou " + this.nome;
+  }
+}
+
+var p = Pessoa("Pedro");
+p.digaOi();
+
+p.idade = 23;
+print p.idade;

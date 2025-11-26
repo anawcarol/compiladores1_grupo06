@@ -1,15 +1,15 @@
-var x = 10;
-var y = 20;
+print "--- Inicio do Teste Simples ---";
 
-print "Olá, mundo!";
+var a = 10;
+var b = 5;
+var soma = a + b;
 
-if(x == 10){
-    var idade = 25;
-    print "Idade: " + idade;
-    if(y == 20){
-        var idade = 25;
-        print "Idade: " + idade;
-    }
+print soma;
+
+if (soma > 12) {
+    print "Soma eh maior que 12";
+} else {
+    print "Soma eh menor que 12";
 }
 
-var k = 2;
+print "--- Fim ---";
