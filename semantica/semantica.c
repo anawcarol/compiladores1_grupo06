@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h> 
 #include "../parser/parser.tab.h"
+
+// Variável estática para contar erros
+static int numErrosSemanticos = 0;
 
 // --- Definições de Contexto ---
 // Usadas para rastrear se estamos dentro de uma função ou classe
@@ -81,6 +85,8 @@ static void verificarTiposBinarios(NoAST *node) {
         }
     }
 }
+
+// --- Visitas à AST ---
 
 static void visitarStatement(NoAST *node, FunctionType funcType, ClassType classType) {
     if (!node) return;
@@ -181,13 +187,14 @@ static void visitarStatement(NoAST *node, FunctionType funcType, ClassType class
             // VALIDAÇÃO: Return fora de função
             if (funcType == CTX_FUNC_NONE) {
                 fprintf(stderr, "Erro Semantico (linha %d): 'return' nao pode ser usado fora de uma funcao.\n", node->lineno);
+                numErrosSemanticos++;
             }
             
             // VALIDAÇÃO: Return com valor dentro de init()
             if (funcType == CTX_FUNC_INITIALIZER && node->data.return_stmt.expression != NULL) {
                 fprintf(stderr, "Erro Semantico (linha %d): Nao pode retornar um valor de um inicializador 'init'.\n", node->lineno);
+                numErrosSemanticos++;
             }
-
             if (node->data.return_stmt.expression) {
                 visitarNo(node->data.return_stmt.expression, funcType, classType);
             }
@@ -254,6 +261,7 @@ static void visitarExpressao(NoAST *node, FunctionType funcType, ClassType class
             if (tab_buscarSimbolo(node->data.assign.name) == NULL) {
                 fprintf(stderr, "Erro Semantico (linha %d): Variavel '%s' nao declarada.\n", 
                     node->lineno, node->data.assign.name);
+                numErrosSemanticos++;
             }
             break;
 
@@ -279,6 +287,7 @@ static void visitarExpressao(NoAST *node, FunctionType funcType, ClassType class
                         if (numArgs != s->numParams) {
                             fprintf(stderr, "Erro Semantico (linha %d): Funcao '%s' esperava %d argumentos, mas recebeu %d.\n", 
                                 node->lineno, nomeFunc, s->numParams, numArgs);
+                            numErrosSemanticos++;
                         }
                     }
                 }
@@ -295,17 +304,17 @@ static void visitarExpressao(NoAST *node, FunctionType funcType, ClassType class
             break;
 
         case NODE_IDENTIFIER:
-            // Verificação de uso de variável
             if (tab_buscarSimbolo(node->data.identifier) == NULL) {
                 fprintf(stderr, "Erro Semantico (linha %d): Variavel '%s' nao declarada.\n", 
                     node->lineno, node->data.identifier);
+                numErrosSemanticos++;
             }
             break;
 
         case NODE_THIS:
-            // VALIDAÇÃO: 'this' fora de classe
             if (classType == CTX_CLASS_NONE) {
                 fprintf(stderr, "Erro Semantico (linha %d): 'this' nao pode ser usado fora de uma classe.\n", node->lineno);
+                numErrosSemanticos++;
             }
             break;
 
@@ -325,7 +334,6 @@ static void visitarNo(NoAST *node, FunctionType funcType, ClassType classType) {
     if (!node) return;
 
     switch (node->type) {
-        // Statements
         case NODE_VAR_DECL:
         case NODE_FUN_DECL:
         case NODE_CLASS_DECL:
@@ -339,7 +347,6 @@ static void visitarNo(NoAST *node, FunctionType funcType, ClassType classType) {
             visitarStatement(node, funcType, classType);
             break;
 
-        // Expressões
         case NODE_UNARY_OP:
         case NODE_BINARY_OP:
         case NODE_LOGICAL_OP:
@@ -357,7 +364,6 @@ static void visitarNo(NoAST *node, FunctionType funcType, ClassType classType) {
             break;
         
         case NODE_PARAM:
-            // Parâmetros são tratados na declaração da função/método
             break;
 
         default:
@@ -366,9 +372,11 @@ static void visitarNo(NoAST *node, FunctionType funcType, ClassType classType) {
     }
 }
 
-void resolver(NoAST *ast_root) {
-    // Inicia a análise com contexto vazio (sem função, sem classe)
+// Retorna o número de erros
+int resolver(NoAST *ast_root) {
+    numErrosSemanticos = 0;
     for (NoAST *node = ast_root; node; node = node->next) {
         visitarNo(node, CTX_FUNC_NONE, CTX_CLASS_NONE);
     }
+    return numErrosSemanticos;
 }

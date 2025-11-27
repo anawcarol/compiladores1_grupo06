@@ -1,0 +1,30 @@
+// ============================================================
+// ARQUIVO: teste_erros_semanticos.lox
+// OBJETIVO: Testar se o compilador aborta e mostra erros.
+// ============================================================
+
+print "--- Inicio do Teste de Erros ---";
+
+// 1. ERRO: Variavel nao declarada
+print x; 
+
+// 2. ERRO: Return fora de funcao
+return "Nao posso retornar daqui";
+
+// 3. ERRO: 'this' fora de classe
+print this;
+
+// 4. ERRO: Funcao com numero errado de argumentos (Aridade)
+fun soma(a, b) {
+  return a + b;
+}
+soma(10); // Esperava 2, recebeu 1
+
+class Pessoa {
+  init() {
+    // 5. ERRO: Return com valor dentro de construtor init
+    return "nao pode retornar valor em init";
+  }
+}
+
+print "--- Fim (Nao deve chegar aqui se abortar corretamente) ---";

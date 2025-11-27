@@ -3,6 +3,6 @@
 
 #include "../ast/ast.h"
 
-void resolver(NoAST *ast_root);
+int resolver(NoAST *ast_root);
 
 #endif

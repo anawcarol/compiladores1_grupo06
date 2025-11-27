@@ -1,0 +1,87 @@
+// ============================================================
+// ARQUIVO: testes/teste_validacao.lox
+// OBJETIVO: Validar a geração de código C final (Happy Path)
+// ============================================================
+
+print "=== INICIO DO TESTE DE VALIDACAO ===";
+
+// -------------------------------------------------
+// 1. Teste de Recursão e Aritmética (Fibonacci)
+// -------------------------------------------------
+print "--- 1. Recursao (Fibonacci) ---";
+
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+
+var inicio = 0; // clock() não implementado, usando var simples
+var resultado = fib(6); 
+print "Fibonacci de 6 (Esperado: 8):";
+print resultado;
+
+// -------------------------------------------------
+// 2. Teste de Classes, 'this' e Atributos
+// -------------------------------------------------
+print "--- 2. Classes e Objetos ---";
+
+class Calculadora {
+  init(fator) {
+    this.fator = fator;
+    this.historico = 0;
+  }
+
+  somar(a, b) {
+    var res = (a + b) * this.fator;
+    this.historico = this.historico + 1;
+    return res;
+  }
+
+  status() {
+    print "Operacoes realizadas: " + this.historico;
+  }
+}
+
+var calc = Calculadora(2); // Multiplica tudo por 2
+var soma = calc.somar(10, 20); // (10+20)*2 = 60
+
+print "Resultado da soma (Esperado: 60):";
+print soma;
+
+calc.somar(1, 1); // Só para incrementar historico
+calc.status();    // Esperado: 2
+
+// -------------------------------------------------
+// 3. Teste de Scoping e Loops (While/For)
+// -------------------------------------------------
+print "--- 3. Loops e Escopo ---";
+
+var a = "global";
+{
+  var a = "bloco";
+  print "Dentro do bloco: " + a; // Esperado: bloco
+}
+print "Fora do bloco: " + a;     // Esperado: global
+
+var i = 0;
+while (i < 3) {
+    print "While loop: " + i;
+    i = i + 1;
+}
+
+// -------------------------------------------------
+// 4. Teste de Tipagem Dinâmica (Runtime)
+// -------------------------------------------------
+print "--- 4. Tipos Dinamicos ---";
+
+var x = 100;
+print x; // Numero
+
+x = "Agora sou uma string";
+print x; // String
+
+if (x) {
+    print "Strings sao verdadeiras (Truthy)";
+}
+
+print "=== FIM DO TESTE ===";

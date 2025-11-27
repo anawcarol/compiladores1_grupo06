@@ -24,21 +24,50 @@ int main(int argc, char** argv) {
     }
 
     tab_inicializar();
-    int ret = yyparse();
+    
+    // Análise Sintática (Parser)
+    int parseResult = yyparse();
 
-    if (ret == 0) {
-        resolver(ast_root);
+    if (parseResult == 0) {
+        
+        // Análise Semântica
+        // Imprime erros no stderr
+        int errosSemanticos = resolver(ast_root);
 
+        if (errosSemanticos > 0) {
+            fprintf(stderr, "\nCompilacao abortada: %d erro(s) semantico(s) encontrado(s).\n", errosSemanticos);
+            liberarAST(ast_root);
+            fclose(yyin);
+            return 1; 
+        }
+
+        // Geração de Código
         TacNode *codigo = gerarCodigo(ast_root);
         
+        // Redireciona stdout 
+        FILE *arquivo_saida = freopen("saida.c", "w", stdout);
+        if (arquivo_saida == NULL) {
+            fprintf(stderr, "Erro ao criar o arquivo saida.c\n");
+            return 1;
+        }
+
         gerarCodigoC(codigo);
+
+        // Fecha stdout (arquivo saida.c) e libera memória
+        fclose(stdout);
+        
+        // Usa stderr para mensagem de sucesso 
+        fprintf(stderr, "Sucesso! Codigo gerado em 'saida.c'.\n");
 
         liberarTac(codigo);
         liberarAST(ast_root);
+
     } else {
-        fprintf(stderr, "Falha na analise.\n");
+        fprintf(stderr, "Falha na analise sintatica.\n");
+        fclose(yyin);
+        return 1;
     }
 
     fclose(yyin);
-    return ret;
+    return 0;
 }

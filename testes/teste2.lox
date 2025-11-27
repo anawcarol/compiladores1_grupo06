@@ -62,5 +62,3 @@ class Carro {
 // Instanciando um objeto da classe Carro
 var carro = Carro("Fusca", "Azul");
 carro.detalhes();  // Saída esperada: Modelo: Fusca, Cor: Azul
-
-print f(4);  // Saída esperada: 16

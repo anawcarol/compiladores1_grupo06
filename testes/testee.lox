@@ -1,0 +1,53 @@
+// ============================================================
+// TESTE: Métodos Ligados (Bound Methods) e Contexto 'this'
+// OBJETIVO: Verificar se o 'this' é preservado ao passar métodos.
+// ============================================================
+
+class Pessoa {
+  init(nome) {
+    this.nome = nome;
+  }
+
+  digaOla() {
+    print "Ola, eu sou " + this.nome;
+  }
+}
+
+var p = Pessoa("Maria");
+
+print "1. Chamada direta (obj.metodo):";
+p.digaOla(); 
+
+print "";
+print "2. Metodo ligado a variavel (var f = obj.metodo):";
+// Isso cria um VAL_BOUND_METHOD. Ao chamar 'f()', o runtime deve 
+// empilhar o objeto 'p' automaticamente antes de executar.
+var f = p.digaOla;
+f(); 
+
+print "";
+print "3. Metodo passado como callback:";
+fun executar(funcao) {
+  print "Executando callback...";
+  funcao();
+}
+
+// Passa o método com o contexto 'this' preservado
+executar(p.digaOla);
+
+print "";
+print "4. Teste de Sobrescrita de 'this' (Seguranca):";
+class Contador {
+  init() { this.val = 0; }
+  inc() { 
+    this.val = this.val + 1; 
+    print this.val;
+  }
+}
+
+var c = Contador();
+var aumentar = c.inc;
+
+aumentar(); // Deve imprimir 1
+aumentar(); // Deve imprimir 2
+c.inc();    // Deve imprimir 3
