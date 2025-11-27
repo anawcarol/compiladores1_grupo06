@@ -5,7 +5,7 @@
 
 // --- SISTEMA DE TIPOS ---
 typedef struct Value Value;
-typedef Value (*NativeFn)(); // Ponteiro para função C que retorna Value
+typedef Value (*NativeFn)(); 
 
 typedef enum { 
     VAL_NUM, VAL_STR, VAL_BOOL, VAL_NIL, VAL_OBJ, VAL_FN, VAL_BOUND_METHOD 
@@ -111,6 +111,7 @@ int is_truthy(Value v) {
     return 1;
 }
 
+// Suporte a String + Num e Num + String
 Value op_add(Value a, Value b) {
     // 1. Num + Num
     if (a.type == VAL_NUM && b.type == VAL_NUM) {
@@ -128,7 +129,7 @@ Value op_add(Value a, Value b) {
     if (a.type == VAL_STR && b.type == VAL_NUM) {
         // Aloca espaço suficiente para a string + um número double (~24 chars)
         char* res = malloc(strlen(a.as.string) + 32); 
-        sprintf(res, "%s%.2f", a.as.string, b.as.number); // Formata o número
+        sprintf(res, "%s%.2f", a.as.string, b.as.number);
         return new_string(res);
     }
 
@@ -148,11 +149,19 @@ Value op_div(Value a, Value b) { return (a.type == VAL_NUM && b.type == VAL_NUM 
 
 Value op_lt(Value a, Value b) { return (a.type == VAL_NUM && b.type == VAL_NUM) ? new_bool(a.as.number < b.as.number) : new_bool(0); }
 Value op_gt(Value a, Value b) { return (a.type == VAL_NUM && b.type == VAL_NUM) ? new_bool(a.as.number > b.as.number) : new_bool(0); }
+
+// Comparação completa
 Value op_eq(Value a, Value b) { 
     if (a.type != b.type) return new_bool(0);
-    if (a.type == VAL_NUM) return new_bool(a.as.number == b.as.number);
-    if (a.type == VAL_STR) return new_bool(strcmp(a.as.string, b.as.string) == 0);
-    return new_bool(0);
+    switch (a.type) {
+        case VAL_NUM: return new_bool(a.as.number == b.as.number);
+        case VAL_STR: return new_bool(strcmp(a.as.string, b.as.string) == 0);
+        case VAL_BOOL: return new_bool(a.as.boolean == b.as.boolean);
+        case VAL_NIL: return new_bool(1); 
+        case VAL_OBJ: return new_bool(a.as.obj == b.as.obj);
+        case VAL_FN: return new_bool(a.as.fn == b.as.fn);
+        default: return new_bool(0);
+    }
 }
 
 Value op_neq(Value a, Value b) { return new_bool(!is_truthy(op_eq(a, b))); }

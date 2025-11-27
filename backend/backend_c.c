@@ -4,8 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
-// Lista para armazenar variáveis já declaradas na função atual para evitar duplicatas
-#define MAX_LOCALS 200
+// Lista para armazenar variáveis locais
+#define MAX_LOCALS 500
 char *localVars[MAX_LOCALS];
 int localCount = 0;
 
@@ -36,7 +36,7 @@ int isFunction(char* name) {
     return 0;
 }
 
-// Helper para resolver operandos (literais ou variáveis)
+// Helper para resolver operandos 
 char* resolve(char* op) {
     if (!op) return "new_nil()";
     if (strcmp(op, "POP_PARAM") == 0) return "pop()";
@@ -65,7 +65,7 @@ char* resolve(char* op) {
     return op; 
 }
 
-// Passo 1: Imprimir declarações de variáveis no topo da função C
+// Imprimir declarações de variáveis no topo da função C
 void declararVariaveis(TacNode *start, TacNode *end) {
     resetLocals();
     TacNode *curr = start;
@@ -94,7 +94,7 @@ void declararVariaveis(TacNode *start, TacNode *end) {
     }
 }
 
-// Passo 2: Gerar o código lógico
+// Gerar o código lógico
 void processarBloco(TacNode *start, TacNode *end) {
     declararVariaveis(start, end);
 
@@ -108,23 +108,17 @@ void processarBloco(TacNode *start, TacNode *end) {
             case TAC_SUB: printf("%s = op_sub(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_MUL: printf("%s = op_mul(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_DIV: printf("%s = op_div(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
-            
             case TAC_GT:  printf("%s = op_gt(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_LT:  printf("%s = op_lt(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_GE:  printf("%s = op_ge(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_LE:  printf("%s = op_le(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_EQ:  printf("%s = op_eq(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_NEQ: printf("%s = op_neq(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
-            
             case TAC_AND: printf("%s = op_and(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_OR:  printf("%s = op_or(%s, %s);\n", curr->res, resolve(curr->arg1), resolve(curr->arg2)); break;
             case TAC_NOT: printf("%s = op_not(%s);\n", curr->res, resolve(curr->arg1)); break;
             case TAC_NEG: printf("%s = op_sub(new_number(0), %s);\n", curr->res, resolve(curr->arg1)); break;
-
-            case TAC_COPY: 
-                printf("%s = %s;\n", curr->res, resolve(curr->arg1)); 
-                break;
-            
+            case TAC_COPY: printf("%s = %s;\n", curr->res, resolve(curr->arg1)); break;
             case TAC_PARAM: printf("push(%s);\n", resolve(curr->res)); break;
             
             case TAC_CALL: {
@@ -133,10 +127,8 @@ void processarBloco(TacNode *start, TacNode *end) {
                      else printf("print_value(pop());\n");
                 } else {
                     if (curr->res) {
-                        if (hasLocal(curr->arg1)) 
-                            printf("%s = call_value(%s);\n", curr->res, curr->arg1);
-                        else
-                            printf("%s = %s();\n", curr->res, curr->arg1);
+                        if (hasLocal(curr->arg1)) printf("%s = call_value(%s);\n", curr->res, curr->arg1);
+                        else printf("%s = %s();\n", curr->res, curr->arg1);
                     } else {
                          if (hasLocal(curr->arg1)) printf("call_value(%s);\n", curr->arg1);
                          else printf("%s();\n", curr->arg1);
@@ -144,22 +136,12 @@ void processarBloco(TacNode *start, TacNode *end) {
                 }
                 break;
             }
-            
-            case TAC_RETURN: 
-                printf("return %s;\n", curr->res ? resolve(curr->res) : "new_nil()"); 
-                break;
-            
-            case TAC_GET_ATTR:
-                printf("%s = get_attr(%s, %s);\n", curr->res, resolve(curr->arg1), curr->arg2); 
-                break;
-            case TAC_SET_ATTR:
-                printf("set_attr(%s, %s, %s);\n", resolve(curr->res), curr->arg1, resolve(curr->arg2));
-                break;
-                
+            case TAC_RETURN: printf("return %s;\n", curr->res ? resolve(curr->res) : "new_nil()"); break;
+            case TAC_GET_ATTR: printf("%s = get_attr(%s, %s);\n", curr->res, resolve(curr->arg1), curr->arg2); break;
+            case TAC_SET_ATTR: printf("set_attr(%s, %s, %s);\n", resolve(curr->res), curr->arg1, resolve(curr->arg2)); break;
             case TAC_LABEL: printf("%s:\n  ;\n", curr->res); break;
             case TAC_JUMP: printf("goto %s;\n", curr->res); break;
             case TAC_JUMP_FALSE: printf("if (!is_truthy(%s)) goto %s;\n", resolve(curr->arg1), curr->res); break;
-            
             default: break;
         }
         curr = curr->next;
@@ -187,12 +169,11 @@ void registerMethod(char* className, char* methodName) {
 void gerarCodigoC(TacNode* head) {
     printf("#include \"backend/c_runtime.c\"\n\n");
 
-    // 1. Identifica classes e métodos (protótipos)
+    // Identifica classes e métodos (protótipos)
     TacNode* scan = head;
     while(scan) {
         if(scan->op == TAC_LABEL && scan->res[0]!='L') {
             if (strcmp(scan->res, "main") == 0) { scan = scan->next; continue; }
-
             char *underscore = strchr(scan->res, '_');
             if(underscore) {
                 char cls[64];
@@ -200,14 +181,13 @@ void gerarCodigoC(TacNode* head) {
                 strncpy(cls, scan->res, len); cls[len] = '\0';
                 registerMethod(cls, scan->res);
             }
-            
             addFunction(scan->res);
             printf("Value %s();\n", scan->res);
         }
         scan = scan->next;
     }
     
-    // 2. Construtores Automáticos
+    // Adicionado push(inst)
     for(int i=0; i<classCount; i++) {
         printf("Value %s() {\n", classes[i].name);
         printf("  Value inst = new_object(\"%s\");\n", classes[i].name);
@@ -216,6 +196,7 @@ void gerarCodigoC(TacNode* head) {
             char* shortName = strchr(fullName, '_') + 1;
             printf("  set_attr(inst, \"%s\", new_native(%s));\n", shortName, fullName);
         }
+        printf("  push(inst);\n"); // <--- AQUI: Passa 'this' para o init
         char initName[128]; sprintf(initName, "%s_init", classes[i].name);
         printf("  %s();\n", initName); 
         printf("  return inst;\n}\n\n");
@@ -226,7 +207,6 @@ void gerarCodigoC(TacNode* head) {
     while (curr) {
         if (curr->op == TAC_LABEL && curr->res[0] != 'L') {
             int isMain = (strcmp(curr->res, "main") == 0);
-            
             if (isMain) printf("int main() {\n");
             else printf("Value %s() {\n", curr->res);
             
@@ -235,12 +215,10 @@ void gerarCodigoC(TacNode* head) {
                 if (end->op == TAC_LABEL && end->res[0] != 'L') break;
                 end = end->next;
             }
-            
             processarBloco(curr->next, end);
             
             if (isMain) printf("  return 0;\n}\n");
             else printf("  return new_nil();\n}\n\n"); 
-            
             curr = end; continue;
         }
         curr = curr->next;

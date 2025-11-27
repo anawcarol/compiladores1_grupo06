@@ -1,0 +1,79 @@
+// ============================================================
+// ARQUIVO: testes/teste_classes_complexo.lox
+// OBJETIVO: Testar Referências, Campos Dinâmicos e 'this'
+// ============================================================
+
+print "--- 1. Teste de Lista Encadeada (Objetos -> Objetos) ---";
+
+class No {
+  init(valor) {
+    this.valor = valor;
+    this.proximo = nil;
+  }
+}
+
+// Criando os nós
+var n1 = No(10);
+var n2 = No(20);
+var n3 = No(30);
+
+// Encadeando: n1 -> n2 -> n3
+n1.proximo = n2;
+n2.proximo = n3;
+
+// Percorrendo a lista
+var atual = n1;
+while (atual != nil) {
+  print "Valor do No: " + atual.valor;
+  atual = atual.proximo;
+}
+
+print "";
+print "--- 2. Teste de Campos Dinamicos ---";
+
+class Ponto {
+  init(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+var p = Ponto(2, 3);
+print "X original: " + p.x;
+
+// Adicionando campo 'z' que nao existia no init
+// O runtime C deve alocar uma nova Entry na struct do objeto
+p.z = 50; 
+print "Z (dinamico): " + p.z;
+
+// Modificando campo existente
+p.x = 99;
+print "X modificado: " + p.x;
+
+
+print "";
+print "--- 3. Teste de Chamada Interna (this.metodo) ---";
+
+class Matematica {
+  init() { 
+    this.pi = 3.14; 
+  }
+
+  dobro(n) {
+    return n * 2;
+  }
+
+  calcular(raio) {
+    // Testando chamada de método dentro de outro método
+    // Se o 'this' estiver errado, isso vai falhar
+    var d = this.dobro(raio);
+    print "Dobro do raio: " + d;
+    return d * this.pi;
+  }
+}
+
+var m = Matematica();
+var areaAprox = m.calcular(10);
+print "Area aprox (2*r*pi): " + areaAprox;
+
+print "--- Fim do Teste ---";                                                               
