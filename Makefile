@@ -13,6 +13,7 @@ BACKEND_C = backend/backend_c.c
 LEXER_C = lexer/lex.yy.c
 PARSER_C = parser/parser.tab.c
 PARSER_H = parser/parser.tab.h
+SAIDA = saida.c
 
 CC = gcc
 CFLAGS = -Wall -g
@@ -31,5 +32,5 @@ $(TARGET): $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(
 	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(CODEGEN_C) $(BACKEND_C) $(LDFLAGS)
 
 clean:
-	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H) parser/parser.output
+	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H) $(SAIDA) parser/parser.output
 	rm -f *.o *.out saida.c saida

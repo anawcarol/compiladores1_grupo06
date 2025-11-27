@@ -8,10 +8,11 @@ typedef struct Value Value;
 typedef Value (*NativeFn)(); // Ponteiro para função C que retorna Value
 
 typedef enum { 
-    VAL_NUM, VAL_STR, VAL_BOOL, VAL_NIL, VAL_OBJ, VAL_FN 
+    VAL_NUM, VAL_STR, VAL_BOOL, VAL_NIL, VAL_OBJ, VAL_FN, VAL_BOUND_METHOD 
 } ValueType;
 
 struct Obj; 
+struct BoundMethod;
 
 struct Value {
     ValueType type;
@@ -21,6 +22,7 @@ struct Value {
         int boolean;
         struct Obj* obj;
         NativeFn fn; // Guarda a função C
+        struct BoundMethod* bound;
     } as;
 };
 
@@ -35,6 +37,11 @@ typedef struct Obj {
     char* className;
     Entry* fields; 
 } Obj;
+
+typedef struct BoundMethod {
+    Obj* receiver;
+    NativeFn method;
+} BoundMethod;
 
 // --- PILHA ---
 #define MAX_STACK 1024
@@ -76,6 +83,14 @@ Value new_object(char* className) {
 Value new_native(NativeFn fn) {
     Value v; v.type = VAL_FN; v.as.fn = fn; return v;
 }
+Value new_bound_method(Obj* receiver, NativeFn method) {
+    Value v; v.type = VAL_BOUND_METHOD;
+    BoundMethod* bm = (BoundMethod*)malloc(sizeof(BoundMethod));
+    bm->receiver = receiver;
+    bm->method = method;
+    v.as.bound = bm;
+    return v;
+}
 
 // --- OPERAÇÕES ---
 void print_value(Value v) {
@@ -86,7 +101,14 @@ void print_value(Value v) {
         case VAL_NIL:  printf("nil\n"); break;
         case VAL_OBJ:  printf("<instance of %s>\n", v.as.obj->className); break;
         case VAL_FN:   printf("<native fn>\n"); break;
+        case VAL_BOUND_METHOD: printf("<bound method of %s>\n", v.as.bound->receiver->className); break;
     }
+}
+
+int is_truthy(Value v) {
+    if (v.type == VAL_NIL) return 0;
+    if (v.type == VAL_BOOL) return v.as.boolean;
+    return 1;
 }
 
 Value op_add(Value a, Value b) {
@@ -112,11 +134,14 @@ Value op_eq(Value a, Value b) {
     return new_bool(0);
 }
 
-int is_truthy(Value v) {
-    if (v.type == VAL_NIL) return 0;
-    if (v.type == VAL_BOOL) return v.as.boolean;
-    return 1;
-}
+Value op_neq(Value a, Value b) { return new_bool(!is_truthy(op_eq(a, b))); }
+Value op_le(Value a, Value b) { return (a.type == VAL_NUM && b.type == VAL_NUM) ? new_bool(a.as.number <= b.as.number) : new_bool(0); }
+Value op_ge(Value a, Value b) { return (a.type == VAL_NUM && b.type == VAL_NUM) ? new_bool(a.as.number >= b.as.number) : new_bool(0); }
+
+Value op_not(Value v) { return new_bool(!is_truthy(v)); }
+
+Value op_and(Value a, Value b) { return is_truthy(a) ? b : a; }
+Value op_or(Value a, Value b)  { return is_truthy(a) ? a : b; }
 
 // Objetos e Atributos
 Value get_attr(Value objVal, char* key) {
@@ -124,7 +149,10 @@ Value get_attr(Value objVal, char* key) {
     Obj* obj = objVal.as.obj;
     Entry* cur = obj->fields;
     while (cur) {
-        if (strcmp(cur->key, key) == 0) return cur->value;
+        if (strcmp(cur->key, key) == 0) {
+            if (cur->value.type == VAL_FN) return new_bound_method(obj, cur->value.as.fn);
+            return cur->value;
+        }
         cur = cur->next;
     }
     return new_nil();
@@ -133,8 +161,6 @@ Value get_attr(Value objVal, char* key) {
 Value set_attr(Value objVal, char* key, Value val) {
     if (objVal.type != VAL_OBJ) return val;
     Obj* obj = objVal.as.obj;
-    
-    // Atualiza se existir
     Entry* cur = obj->fields;
     while (cur) {
         if (strcmp(cur->key, key) == 0) {
@@ -143,7 +169,6 @@ Value set_attr(Value objVal, char* key, Value val) {
         }
         cur = cur->next;
     }
-    // Cria novo
     Entry* new_entry = malloc(sizeof(Entry));
     new_entry->key = strdup(key);
     new_entry->value = val;
@@ -154,8 +179,11 @@ Value set_attr(Value objVal, char* key, Value val) {
 
 // Helper para chamar função guardada em variável
 Value call_value(Value f) {
-    if (f.type == VAL_FN && f.as.fn) {
-        return f.as.fn();
+    if (f.type == VAL_FN && f.as.fn) return f.as.fn();
+    if (f.type == VAL_BOUND_METHOD) {
+        Value receiver; receiver.type = VAL_OBJ; receiver.as.obj = f.as.bound->receiver;
+        push(receiver);
+        return f.as.bound->method();
     }
     fprintf(stderr, "Erro: Tentando chamar algo que nao e funcao.\n");
     return new_nil();

@@ -1,0 +1,92 @@
+// ============================================================
+// ARQUIVO: testes/teste_funcional.lox
+// OBJETIVO: Validar funcionalidades básicas sem uso de Classes
+// ============================================================
+
+print "--- 1. Tipos e Aritmetica ---";
+print 10 + 20;             // 30
+print 10 - 2;              // 8
+print 3 * 4;               // 12
+print 10 / 2;              // 5
+print (1 + 2) * 3;         // 9 (Precedencia)
+print "Ola " + "Mundo";    // Ola Mundo
+print true;
+print !true;               // false
+print nil;
+
+print "--- 2. Logica e Comparacao ---";
+var a = 10;
+var b = 20;
+print a < b;      // true
+print a >= 10;    // true
+print a == 10;    // true
+print a != b;     // true
+
+// Teste de curto-circuito (Short-circuit)
+print "Short-circuit OR:";
+print true or "nao deve imprimir"; // true
+print "Short-circuit AND:";
+print false and "nao deve imprimir"; // false
+
+print "--- 3. Escopo e Sombrento (Shadowing) ---";
+var x = "global";
+{
+  var x = "local";
+  print x; // local
+}
+print x;   // global
+
+print "--- 4. Controle de Fluxo (If/While/For) ---";
+var i = 0;
+if (i == 0) {
+  print "i eh zero";
+} else {
+  print "erro";
+}
+
+print "Contando while:";
+while (i < 3) {
+  print i;
+  i = i + 1;
+}
+
+print "Contando for:";
+for (var j = 0; j < 3; j = j + 1) {
+  print j;
+}
+
+print "--- 5. Funcoes ---";
+fun saudacao(nome) {
+  print "Ola, " + nome + "!";
+}
+saudacao("Teste");
+
+fun soma(x, y) {
+  return x + y;
+}
+print soma(5, 7); // 12
+
+print "--- 6. Recursao (Fatorial) ---";
+fun fatorial(n) {
+  if (n <= 1) return 1;
+  return n * fatorial(n - 1);
+}
+
+print "Fatorial de 5:";
+print fatorial(5); // 120
+
+print "--- 7. Closures (Contador) ---";
+fun criarContador() {
+  var contador = 0;
+  fun incrementar() {
+    contador = contador + 1;
+    print contador;
+  }
+  return incrementar;
+}
+
+var c = criarContador();
+c(); // 1
+c(); // 2
+
+print "--- Fim dos Testes ---";
