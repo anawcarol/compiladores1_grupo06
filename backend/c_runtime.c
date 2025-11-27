@@ -112,12 +112,33 @@ int is_truthy(Value v) {
 }
 
 Value op_add(Value a, Value b) {
-    if (a.type == VAL_NUM && b.type == VAL_NUM) return new_number(a.as.number + b.as.number);
+    // 1. Num + Num
+    if (a.type == VAL_NUM && b.type == VAL_NUM) {
+        return new_number(a.as.number + b.as.number);
+    }
+    
+    // 2. String + String
     if (a.type == VAL_STR && b.type == VAL_STR) {
         char* res = malloc(strlen(a.as.string) + strlen(b.as.string) + 1);
         sprintf(res, "%s%s", a.as.string, b.as.string);
         return new_string(res);
     }
+
+    // 3. String + Num (Conversão Implícita)
+    if (a.type == VAL_STR && b.type == VAL_NUM) {
+        // Aloca espaço suficiente para a string + um número double (~24 chars)
+        char* res = malloc(strlen(a.as.string) + 32); 
+        sprintf(res, "%s%.2f", a.as.string, b.as.number); // Formata o número
+        return new_string(res);
+    }
+
+    // 4. Num + String (Conversão Implícita)
+    if (a.type == VAL_NUM && b.type == VAL_STR) {
+        char* res = malloc(strlen(b.as.string) + 32);
+        sprintf(res, "%.2f%s", a.as.number, b.as.string);
+        return new_string(res);
+    }
+
     return new_nil();
 }
 
