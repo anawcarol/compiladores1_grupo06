@@ -1,0 +1,80 @@
+// ============================================================
+// ARQUIVO: testes/teste_loops.lox
+// OBJETIVO: Estressar a lógica de laços While e For
+// ============================================================
+
+print "--- 1. While Decremental Simples ---";
+var i = 3;
+while (i > 0) {
+  print "Contagem regressiva: " + i;
+  i = i - 1;
+}
+print "Decolagem!";
+
+print "";
+print "--- 2. While com Condicao Composta (AND/OR) ---";
+var a = 0;
+var b = 10;
+// Teste se o gerador lida bem com saltos de curto-circuito dentro da condicao do loop
+while (a < 3 and b > 7) {
+  print "a=" + a + ", b=" + b;
+  a = a + 1;
+  b = b - 1;
+}
+
+print "";
+print "--- 3. While Aninhado (Labels unicos) ---";
+var x = 1;
+while (x <= 2) {
+  print "Externo x: " + x;
+  var y = 1;
+  while (y <= 2) {
+    print "  Interno y: " + y;
+    y = y + 1;
+  }
+  x = x + 1;
+}
+
+print "";
+print "--- 4. While dentro de For ---";
+for (var k = 1; k <= 2; k = k + 1) {
+  print "For k: " + k;
+  var m = 3;
+  while (m > 1) {
+    print "  While m: " + m;
+    m = m - 1;
+  }
+}
+
+print "";
+print "--- 5. Modificando Global dentro do While ---";
+var total = 0;
+var cont = 0;
+while (cont < 5) {
+  // Acesso a variavel declarada fora do loop
+  total = total + 10;
+  cont = cont + 1;
+}
+print "Total calculado (5 * 10): " + total;
+
+print "";
+print "--- 6. Fibonacci com While ---";
+var n = 10;
+var t1 = 0;
+var t2 = 1;
+var nextTerm = t1 + t2;
+
+print "Fib ate " + n + ":";
+print t1;
+print t2;
+
+var j = 3;
+while (j <= n) {
+  print nextTerm;
+  t1 = t2;
+  t2 = nextTerm;
+  nextTerm = t1 + t2;
+  j = j + 1;
+}
+
+print "--- Fim dos Testes de Loop ---";
