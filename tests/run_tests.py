@@ -3,7 +3,8 @@
 import subprocess, sys, os, difflib, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-LEGACY_DIR = ROOT / "testes"
+LOX_TESTS_DIR = ROOT / "tests" / "lox_tests"  # Diretório atualizado para os arquivos de testes Lox
+EXPECTED_TESTS_DIR = ROOT / "tests" / "expected_tests"  # Diretório atualizado para os arquivos de expectativa
 
 def pick_compiler() -> pathlib.Path:
     env = os.environ.get("COMPILER")
@@ -36,13 +37,14 @@ def norm(s: str) -> str:
 
 def expected_for(lox: pathlib.Path) -> pathlib.Path:
     name = lox.name
+    # Atualiza o caminho para buscar os arquivos de expectativa em 'expected_tests'
     if not name.startswith("teste") or not name.endswith(".lox"):
-        return lox.with_suffix(".out.expected")
+        return EXPECTED_TESTS_DIR / (lox.stem + ".out.expected")
     suffix = name[len("teste"):-len(".lox")]
-    return lox.with_name(f"testes{suffix}.lox.expected")
+    return EXPECTED_TESTS_DIR / f"testes{suffix}.lox.expected"
 
 def discover():
-    all_lox = sorted(LEGACY_DIR.glob("teste*.lox"))
+    all_lox = sorted(LOX_TESTS_DIR.glob("teste*.lox"))  # Atualiza para ler os testes de 'lox_tests'
     only = os.environ.get("ONLY")
     if not only:
         return all_lox
@@ -55,12 +57,12 @@ def main():
     error_strict = os.environ.get("ERROR_STRICT", "1") == "1"
     tests = discover()
     if not tests:
-        print("[AVISO] Nenhum 'teste*.lox' em 'testes/'.")
+        print("[AVISO] Nenhum 'teste*.lox' em 'lox_tests/'.")
         sys.exit(0)
     print(f"Usando compilador: {compiler}")
     total = len(tests)
     fails_total = 0
-    print(f"Descobertos {total} testes em 'testes/'.\n")
+    print(f"Descobertos {total} testes em 'lox_tests/'.\n")
     for lox in tests:
         exp = expected_for(lox)
         proc = subprocess.run([str(compiler), str(lox)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
