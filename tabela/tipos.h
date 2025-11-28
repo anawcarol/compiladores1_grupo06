@@ -5,7 +5,6 @@
 #define TIPOS_H
 
 #include <stdlib.h> // Para size_t
-
 // Enum para todos os tipos de nós possíveis na AST
 typedef enum {
     // Literais
