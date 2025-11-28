@@ -156,30 +156,26 @@ make test_teste_lox
 
 Isso irá rodar apenas o teste do arquivo `teste.lox`.
 
+
 ### 💡 Como os Testes Funcionam
 
-Os testes são escritos em CUnit e verificam se a saída do compilador corresponde à saída esperada. O arquivo `test_compilador.c` automatiza o processo de execução do compilador e comparação da saída com a esperada para os seguintes arquivos de teste:
+Os testes automatizados são executados pelo script `run_tests.py`, que encontra os arquivos de teste na pasta `tests/lox_tests/` e compara a saída do compilador com os resultados esperados na pasta `tests/expected_tests/`.
 
-  * `teste.lox`: Testa operações aritméticas, expressões e funções.
-  * `teste2.lox`: Testa declarações de variáveis, funções e estruturas de controle.
-  * `teste3.lox`: Testa literais, laços e declarações de classes.
-  * `teste_erros.lox`: Testa erros de sintaxe, como caracteres inválidos e operadores inesperados.
+O script utiliza os seguintes passos:
 
-### 🧩 Estrutura dos Testes
+1. Localiza os arquivos de teste na pasta `lox_tests/`.
+2. Executa o compilador sobre esses arquivos de teste.
+3. Compara a saída gerada com o conteúdo dos arquivos de expectativa localizados na pasta `expected_tests/`.
 
-O arquivo de testes contém funções como:
+**Arquivos de Teste**: Alguns dos arquivos de teste presentes na pasta `lox_tests/` incluem:
 
-```c
-void test_funcionalidade_lox() {
-    // Testes de funcionalidade
-    test_compilador_output("testes/teste.lox", "X não é maior que Y\n30\n-10\n11\n12\n2\n10\nfalse\ntrue\ntrue and false\ntrue\nX é maior que Y\nHello, world!\n15\nfalse\nfalse");
-    
-    // Teste de erro para 'teste_erros.lox'
-    test_compilador_output("testes/teste_erros.lox", "Erro: Caractere '#' não reconhecido.\nErro: String não terminada.\nErro: Número com múltiplos pontos decimais...");
-}
-```
+* `teste.lox`: Testa operações aritméticas, expressões e funções.
+* `teste2.lox`: Testa declarações de variáveis, funções e estruturas de controle.
+* `teste3.lox`: Testa literais, laços e declarações de classes.
+* `teste_erros.lox`: Testa erros de sintaxe, como caracteres inválidos e operadores inesperados.
 
-Esse código roda o compilador, captura a saída e a compara com a saída esperada para garantir que os testes passaram ou falharam corretamente.
+**Arquivos de Expectativa**: Para cada arquivo de teste, existe um arquivo correspondente na pasta `expected_tests/` com a extensão `.expected`, que contém a saída esperada para o teste. Por exemplo, o teste `teste.lox` tem sua saída esperada em `teste.out.expected`.
+
 
 ## 📚 Exemplos de Código Lox
 
