@@ -12,7 +12,6 @@ typedef struct simbolo {
     int numParams;
     struct simbolo *prox;
 } Simbolo;
-
 void tab_inicializar();
 void tab_entrarEscopo();
 void tab_sairEscopo();
