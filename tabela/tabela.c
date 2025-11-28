@@ -13,7 +13,6 @@ unsigned int hash(char *nome) {
     }
     return hash_val % TAM_HASH;
 }
-
 void tab_inicializar() {
     escopoAtual = 0;
     for (int i = 0; i < TAM_HASH; i++) {

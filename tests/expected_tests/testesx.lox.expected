@@ -1,0 +1,4 @@
+[AVISO Semantico] Linha 69: Operacao '+' entre tipos possivelmente incompativeis: 'int' e 'string'.
+[AVISO Semantico] Linha 72: Operador aritmetico espera numeros, mas encontrou 'string' e 'int'.
+[AVISO Semantico] Linha 75: Operador aritmetico espera numeros, mas encontrou 'bool' e 'int'.
+[AVISO Semantico] Linha 78: Operador aritmetico espera numeros, mas encontrou 'string' e 'int'.

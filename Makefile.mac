@@ -1,0 +1,47 @@
+# Makefile.mac - Versão compatível com macOS
+# Uso: make -f Makefile.mac
+
+TARGET = compilador
+
+LEXER = lexer/lexer.l
+PARSER = parser/parser.y
+MAIN = scr/main.c
+
+AST_C = ast/ast.c
+TABELA_C = tabela/tabela.c
+SEMANTICA_C = semantica/semantica.c
+CODEGEN_C = codegen/tac.c codegen/codegen.c
+BACKEND_C = backend/backend_c.c
+
+LEXER_C = lexer/lex.yy.c
+PARSER_C = parser/parser.tab.c
+PARSER_H = parser/parser.tab.h
+SAIDA = saida.c
+
+# Configurações específicas para macOS - CAMINHO CORRETO
+CC = gcc
+BISON = /opt/homebrew/opt/bison/bin/bison  # CAMINHO CORRETO!
+FLEX = flex
+CFLAGS = -Wall -g
+LDFLAGS = -lm -ll
+
+all: $(TARGET)
+
+$(PARSER_C) $(PARSER_H): $(PARSER)
+	@echo "Usando Bison: $(shell $(BISON) --version | head -n1)"
+	$(BISON) -d -o $(PARSER_C) $(PARSER)
+
+$(LEXER_C): $(LEXER) $(PARSER_H)
+	$(FLEX) -o $(LEXER_C) $(LEXER)
+
+$(TARGET): $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(CODEGEN_C) $(BACKEND_C)
+	$(CC) $(CFLAGS) -o $(TARGET) $(MAIN) $(PARSER_C) $(LEXER_C) $(AST_C) $(TABELA_C) $(SEMANTICA_C) $(CODEGEN_C) $(BACKEND_C) $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET) $(LEXER_C) $(PARSER_C) $(PARSER_H) $(SAIDA) parser/parser.output
+	rm -f *.o *.out saida.c saida
+
+test: $(TARGET)
+	python tests/run_tests.py
+
+.PHONY: all clean test
