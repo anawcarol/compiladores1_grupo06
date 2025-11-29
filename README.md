@@ -586,23 +586,43 @@ char* obterNomeTipo(NoAST *no) {
 ```
 # Sistema de Testes
 
-## 🧪 Testes Automatizados
+## 🧪 Estrutura do Sistema de Testes
 
-### Visão Geral dos Testes Automatizados
+```
+tests/
+├── run_tests.py           # Executor principal de testes
+├── update_expected.py     # Atualizador de expectativas
+├── lox_tests/            # Códigos fonte de teste em Lox
+│   ├── teste.lox         # Teste básico
+│   ├── teste0.lox        # Expressões aritméticas
+│   ├── teste2.lox        # Variáveis e funções
+│   ├── teste3.lox        # Estruturas de controle
+│   ├── teste_ast.lox     # Análise de AST
+│   ├── teste_erros.lox   # Casos de erro
+│   ├── teste_escopo.lox  # Testes de escopo
+│   ├── teste_final.lox   # Teste principal
+│   ├── teste_classe_final.lox  # Classes e objetos
+│   ├── teste_tac.lox     # Geração de TAC
+│   └── ... (20+ arquivos)
+└── expected_tests/       # Saídas esperadas dos testes
+    ├── testes.lox.expected
+    ├── testes0.lox.expected
+    ├── testes2.lox.expected
+    ├── testes3.lox.expected
+    ├── testes_ast.lox.expected
+    ├── testes_erros.lox.expected
+    └── ... (20+ arquivos)
+```
 
-O compilador inclui um **sistema completo de testes automatizados** que verifica todas as funcionalidades implementadas através de testes de integração.
+## 🤖 Testes Automatizados
 
-### Ferramentas de Automação
-
-#### 1. `run_tests.py` - Executor de Testes
+### Executor de Testes (`run_tests.py`)
 
 **Funcionalidades:**
-- ✅ **Execução automatizada** de todos os testes
-- ✅ **Comparação inteligente** entre saída atual e esperada
-- ✅ **Relatório detalhado** com sucessos e falhas
-- ✅ **Execução seletiva** de testes específicos
-- ✅ **Múltiplos modos** de verificação (sintaxe, erros, etc.)
-- ✅ **Detecção de regressões** automática
+- Executa todos os testes automaticamente
+- Compara saída com resultados esperados
+- Gera relatório detalhado de sucessos/falhas
+- Suporte a execução seletiva de testes
 
 **Uso:**
 ```bash
@@ -610,153 +630,188 @@ O compilador inclui um **sistema completo de testes automatizados** que verifica
 python tests/run_tests.py
 
 # Executar testes específicos
-ONLY="teste1,teste2" python tests/run_tests.py
+ONLY="teste,teste_erros" python tests/run_tests.py
+
+# Modo apenas análise sintática
+PARSE_ONLY=1 python tests/run_tests.py
 ```
 
-#### 2. `update_expected.py` - Gerenciador de Expectativas
+### Atualizador de Expectativas (`update_expected.py`)
 
 **Funcionalidades:**
-- ✅ **Geração automática** de arquivos de expectativa
-- ✅ **Atualização em lote** de todos os testes
-- ✅ **Sincronização** entre código e resultados esperados
-- ✅ **Facilita manutenção** dos testes
+- Gera/atualiza automaticamente os arquivos `.expected`
+- Mantém os testes atualizados com comportamento atual
 
 **Uso:**
 ```bash
 # Atualizar todas as expectativas
 python tests/update_expected.py
+
+# Atualizar testes específicos
+ONLY="teste_final,teste_classe" python tests/update_expected.py
+```
+
+### Exemplo de Saída dos Testes Automatizados
+
+```
+Usando compilador: ./compilador
+Descobertos 19 testes em 'lox_tests/'.
+
+[ OK ] tests/lox_tests/teste.lox
+[ OK ] tests/lox_tests/teste0.lox
+[ OK ] tests/lox_tests/teste_erros.lox (erro detectado)
+[FAIL] tests/lox_tests/teste_classe_final.lox
+
+Resumo:
+  Total: 19
+  Pass:  18
+  Fail:  1
 ```
 
 ## 🔧 Testes Manuais
 
-### Como Fazer Testes Manuais sem Automação
-
-#### 1. **Teste Básico com um Arquivo .lox**
+### Como Testar Arquivos Individuais
 
 ```bash
-# Compilar e testar um arquivo específico
-./compilador testes/teste.lox
+# Testar um arquivo específico
+./compilador tests/lox_tests/teste.lox
 
 # Testar múltiplos arquivos
-./compilador testes/teste_final.lox
-./compilador testes/teste_erros.lox
-./compilador testes/teste_classe_final.lox
+./compilador tests/lox_tests/teste_final.lox
+./compilador tests/lox_tests/teste_erros.lox
+./compilador tests/lox_tests/teste_classe_final.lox
 ```
 
-#### 2. **Verificar Saída Esperada Manualmente**
+### Categorias de Testes Manuais
+
+#### 1. **Testes Básicos e Expressões**
+```bash
+./compilador tests/lox_tests/teste.lox    # Operações básicas
+./compilador tests/lox_tests/teste0.lox   # Expressões aritméticas
+./compilador tests/lox_tests/teste2.lox   # Variáveis e funções
+./compilador tests/lox_tests/teste3.lox   # Estruturas de controle
+```
+
+#### 2. **Testes de Análise**
+```bash
+./compilador tests/lox_tests/teste_ast.lox     # Árvore sintática
+./compilador tests/lox_tests/teste_escopo.lox  # Escopos e símbolos
+./compilador tests/lox_tests/teste_aridade.lox # Parâmetros de função
+```
+
+#### 3. **Testes de Classes e Objetos**
+```bash
+./compilador tests/lox_tests/teste_classe_final.lox  # Classes completas
+./compilador tests/lox_tests/teste_sem_classe.lox    # Funções sem classes
+```
+
+#### 4. **Testes de Geração de Código**
+```bash
+./compilador tests/lox_tests/teste_tac.lox         # TAC básico
+./compilador tests/lox_tests/teste_tac2.lox        # TAC avançado
+./compilador tests/lox_tests/teste_tac_classes.lox # TAC com classes
+```
+
+#### 5. **Testes de Erro**
+```bash
+./compilador tests/lox_tests/teste_erros.lox      # Casos de erro diversos
+./compilador tests/lox_tests/teste_err.lox        # Erros específicos
+./compilador tests/lox_tests/erro_nao_declarada.lox # Erros semânticos
+```
+
+#### 6. **Testes Avançados**
+```bash
+./compilador tests/lox_tests/teste_final.lox      # Teste principal
+./compilador tests/lox_tests/teste_final2.lox     # Teste secundário
+./compilador tests/lox_tests/teste_forwhile.lox   # Loops for/while
+./compilador tests/lox_tests/testee.lox           # Teste extensivo
+./compilador tests/lox_tests/testex.lox           # Teste experimental
+```
+
+### Verificação Manual de Resultados
 
 ```bash
-# Executar o compilador e salvar a saída
-./compilador testes/teste_final.lox > saida_atual.txt
+# Executar e salvar saída
+./compilador tests/lox_tests/teste_final.lox > saida_atual.txt
 
-# Comparar com a expectativa manualmente
-diff saida_atual.txt testes/teste_final.lox.expected
+# Comparar com expectativa manualmente
+diff saida_atual.txt tests/expected_tests/testes_final.lox.expected
 
 # Ou visualmente
+echo "=== SAÍDA ATUAL ==="
 cat saida_atual.txt
-echo "--- ESPERADO ---"
-cat testes/teste_final.lox.expected
+echo "=== ESPERADO ==="
+cat tests/expected_tests/testes_final.lox.expected
 ```
 
-#### 3. **Testes por Categoria**
+### Script de Teste Manual Completo
 
-**Testes de Expressões:**
 ```bash
-./compilador testes/teste.lox           # Operações básicas
-./compilador testes/teste0.lox          # Expressões aritméticas
+#!/bin/bash
+echo "=== INICIANDO TESTES MANUAIS ==="
+
+TESTES=(
+    "tests/lox_tests/teste.lox"
+    "tests/lox_tests/teste0.lox"
+    "tests/lox_tests/teste2.lox"
+    "tests/lox_tests/teste3.lox"
+    "tests/lox_tests/teste_final.lox"
+    "tests/lox_tests/teste_erros.lox"
+    "tests/lox_tests/teste_classe_final.lox"
+    "tests/lox_tests/teste_tac.lox"
+)
+
+for teste in "${TESTES[@]}"; do
+    echo "🧪 Testando: $(basename $teste)"
+    ./compilador "$teste" 2>&1 | head -5
+    echo "---"
+done
 ```
 
-**Testes de Estruturas de Controle:**
+### Pipeline de Desenvolvimento com Testes
+
 ```bash
-./compilador testes/teste_for.lox       # Loops for
-./compilador testes/teste_forwhile.lox  # For e while
-./compilador testes/teste3.lox          # If/else
-```
+# 1. Desenvolvimento rápido (testes manuais)
+./compilador tests/lox_tests/teste_classe_final.lox
 
-**Testes de Funções:**
-```bash
-./compilador testes/teste_aridade.lox   # Parâmetros e aridade
-./compilador testes/teste_sem_classe.lox # Funções sem classes
-```
-
-**Testes de Classes:**
-```bash
-./compilador testes/teste_classe_final.lox  # Classes completas
-./compilador testes/teste_tac_classes.lox   # Classes com TAC
-```
-
-**Testes de Erros:**
-```bash
-./compilador testes/teste_erros.lox     # Casos de erro diversos
-./compilador testes/teste_err.lox       # Erros específicos
-./compilador testes/erro_nao_declarada.lox # Erros semânticos
-```
-
-**Testes de Geração de Código (TAC):**
-```bash
-./compilador testes/teste_tac.lox       # TAC básico
-./compilador testes/teste_tac2.lox      # TAC avançado
-```
-
-### Vantagens dos Testes Manuais
-
-- ✅ **Controle total** sobre quais testes executar
-- ✅ **Debug mais fácil** - pode ver a saída completa
-- ✅ **Testes específicos** - foca em áreas problemáticas
-- ✅ **Sem dependências** - não precisa do Python ou scripts
-- ✅ **Ideal para desenvolvimento** - teste rápido durante codificação
-
-
-Ambas as abordagens são complementares e podem ser usadas conforme a necessidade do momento.
-
-# Sistema de Testes Automatizados
-
-## Visão Geral dos Testes
-
-O compilador inclui um **sistema completo de testes automatizados** que verifica todas as funcionalidades implementadas através de testes de integração.
-
-
-### Ferramentas de Automação
-
-#### 1. `run_tests.py` - Executor de Testes
-
-**Funcionalidades:**
-- ✅ **Execução automatizada** de todos os testes
-- ✅ **Comparação inteligente** entre saída atual e esperada
-- ✅ **Relatório detalhado** com sucessos e falhas
-- ✅ **Execução seletiva** de testes específicos
-- ✅ **Múltiplos modos** de verificação (sintaxe, erros, etc.)
-- ✅ **Detecção de regressões** automática
-
-**Uso:**
-```bash
-# Executar todos os testes
+# 2. Validação completa (testes automatizados)
 python tests/run_tests.py
 
-# Executar testes específicos
-ONLY="teste1,teste2" python tests/run_tests.py
-```
-
-#### 2. `update_expected.py` - Gerenciador de Expectativas
-
-**Funcionalidades:**
-- ✅ **Geração automática** de arquivos de expectativa
-- ✅ **Atualização em lote** de todos os testes
-- ✅ **Sincronização** entre código e resultados esperados
-- ✅ **Facilita manutenção** dos testes
-
-**Uso:**
-```bash
-# Atualizar todas as expectativas
+# 3. Quando comportamento muda legitimamente
 python tests/update_expected.py
+
+# 4. Debug de problema específico
+ONLY="teste_problema" python tests/run_tests.py
 ```
 
-### Fluxo de Testes Automatizado
+### Variáveis de Ambiente para Testes
 
-1. **Descoberta Automática** - Localiza todos os arquivos `teste*.lox`
-2. **Execução em Lote** - Compila cada teste com o compilador
-3. **Comparação de Resultados** - Diferença entre saída atual e esperada
-4. **Relatório Consolidado** - Sumário com estatísticas de sucesso/falha
+```bash
+# Especificar compilador customizado
+export COMPILER="/caminho/para/compilador"
+
+# Executar apenas testes específicos
+export ONLY="teste,teste_erros"
+
+# Modo apenas análise sintática
+export PARSE_ONLY=1
+
+# Modo relaxado para tratamento de erros
+export ERROR_STRICT=0
+```
+
+## 📊 Resumo das Abordagens
+
+| Cenário | Abordagem Recomendada | Comando |
+|---------|----------------------|---------|
+| Desenvolvimento rápido | Testes manuais | `./compilador tests/lox_tests/arquivo.lox` |
+| Validação completa | Testes automatizados | `python tests/run_tests.py` |
+| CI/CD | Testes automatizados | `python tests/run_tests.py` |
+| Debug específico | Testes manuais | `./compilador tests/lox_tests/teste_erros.lox` |
+| Atualizar expectativas | Atualizador | `python tests/update_expected.py` |
+| Teste de regressão | Ambos | Script personalizado |
+
+Ambas as abordagens são complementares e garantem que o compilador funcione corretamente em todas as fases de desenvolvimento.
 
 ### Integração com Desenvolvimento
 
