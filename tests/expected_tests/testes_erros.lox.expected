@@ -1,6 +1,6 @@
 
 
-[ERRO] Erro Semantico (linha 50): 'return' nao pode ser usado fora de uma funcao.
+ Erro Semantico (linha 50): 'return' nao pode ser usado fora de uma funcao.
 Erro Semantico (linha 97): 'this' nao pode ser usado fora de uma classe.
 
 Compilacao abortada: 2 erro(s) semantico(s) encontrado(s).

@@ -3,7 +3,7 @@
 [AVISO Semantico] Linha 75: Operador aritmetico espera numeros, mas encontrou 'bool' e 'int'.
 [AVISO Semantico] Linha 78: Operador aritmetico espera numeros, mas encontrou 'string' e 'int'.
 
-[ERRO] Erro Semantico (linha 47): 'return' nao pode ser usado fora de uma funcao.
+ Erro Semantico (linha 47): 'return' nao pode ser usado fora de uma funcao.
 Erro Semantico (linha 50): 'this' nao pode ser usado fora de uma classe.
 Erro Semantico (linha 55): Nao pode retornar um valor de um inicializador 'init'.
 

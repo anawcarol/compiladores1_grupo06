@@ -2,7 +2,7 @@
 [AVISO Semantico] Linha 93: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 [AVISO Semantico] Linha 99: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 
-[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+ Sucesso! Codigo gerado em 'saida.c'.
 --- Iniciando Testes Abrangentes ---
 --- Testando Literais e ExpressÃµes ---
 123.00

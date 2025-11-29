@@ -1,6 +1,6 @@
 [AVISO Semantico] Linha 68: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 
-[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+ Sucesso! Codigo gerado em 'saida.c'.
 === INICIO DO TESTE DE VALIDACAO ===
 --- 1. Recursao (Fibonacci) ---
 Fibonacci de 6 (Esperado: 8):

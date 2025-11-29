@@ -62,7 +62,7 @@ def run_test(lox: pathlib.Path, compiler: pathlib.Path) -> str:
     
     # Se houver erro no stderr, podemos juntar a saída de erro com a saída padrão
     if error_output:
-        output += "\n[ERRO] " + error_output
+        output += "\n " + error_output
 
     # Se o compilador gerar 'saida.c', tentamos compilá-lo e executá-lo
     if "Codigo gerado em 'saida.c'" in output:
@@ -77,7 +77,7 @@ def run_test(lox: pathlib.Path, compiler: pathlib.Path) -> str:
             exec_proc = subprocess.run(["./saida"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             output += norm(exec_proc.stdout)
             if exec_proc.stderr:
-                output += "\n[ERRO] " + exec_proc.stderr
+                output += "\n" + exec_proc.stderr
 
     return output
 

@@ -7,7 +7,7 @@
 [AVISO Semantico] Linha 58: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 [AVISO Semantico] Linha 67: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 
-[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+ Sucesso! Codigo gerado em 'saida.c'.
 --- 1. While Decremental Simples ---
 Contagem regressiva: 3.00
 Contagem regressiva: 2.00

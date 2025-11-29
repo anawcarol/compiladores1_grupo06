@@ -1,6 +1,6 @@
 
 
-[ERRO] Erro Semantico (linha 9): Variavel 'x' nao declarada.
+ Erro Semantico (linha 9): Variavel 'x' nao declarada.
 Erro Semantico (linha 12): 'return' nao pode ser usado fora de uma funcao.
 Erro Semantico (linha 15): 'this' nao pode ser usado fora de uma classe.
 Erro Semantico (linha 21): Funcao 'soma' esperava 2 argumentos, mas recebeu 1.
