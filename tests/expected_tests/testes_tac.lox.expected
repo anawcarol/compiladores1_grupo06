@@ -1,0 +1,23 @@
+#include "backend/c_runtime.c"
+
+int main() {
+  Value a_0, b_1, t0, t1, c_2, t2, t3, d_3, t4, t5, x_4, t6, t7, t8, t9;
+  a_0 = new_number(10.00);
+  b_1 = new_number(5.00);
+  t0 = op_mul(b_1, new_number(2.00));
+  t1 = op_add(a_0, t0);
+  c_2 = t1;
+  t2 = op_add(a_0, b_1);
+  t3 = op_mul(t2, new_number(2.00));
+  d_3 = t3;
+  t4 = op_div(c_2, b_1);
+  t5 = op_sub(t4, new_number(1.00));
+  x_4 = t5;
+  t6 = op_add(x_4, new_number(10.00));
+  a_0 = t6;
+  t7 = op_mul(new_number(2.00), new_number(3.00));
+  t8 = op_add(new_number(1.00), t7);
+  t9 = op_sub(t8, new_number(4.00));
+  x_4 = t9;
+  return 0;
+}

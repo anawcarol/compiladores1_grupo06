@@ -1,0 +1,160 @@
+#include "backend/c_runtime.c"
+
+Value saudacao();
+Value soma();
+Value fatorial();
+Value criarContador();
+Value incrementar();
+Value saudacao() {
+  Value nome_0, t0, t1;
+  nome_0 = pop();
+  t0 = op_add(new_string("Ola, "), nome_0);
+  t1 = op_add(t0, new_string("!"));
+  print_value(t1);
+  return new_nil();
+  return new_nil();
+}
+
+Value soma() {
+  Value x_1, y_2, t2;
+  x_1 = pop();
+  y_2 = pop();
+  t2 = op_add(x_1, y_2);
+  return t2;
+  return new_nil();
+  return new_nil();
+}
+
+Value fatorial() {
+  Value n_3, t3, t4, t5, t6;
+  n_3 = pop();
+  t3 = op_le(n_3, new_number(1.00));
+  if (!is_truthy(t3)) goto L0;
+  return new_number(1.00);
+  goto L1;
+  L0:
+  ;
+  L1:
+  ;
+  t4 = op_sub(n_3, new_number(1.00));
+  push(t4);
+  t5 = fatorial();
+  t6 = op_mul(n_3, t5);
+  return t6;
+  return new_nil();
+  return new_nil();
+}
+
+Value criarContador() {
+  Value contador_4;
+  contador_4 = new_number(0.00);
+  return new_native(incrementar);
+  return new_nil();
+  return new_nil();
+}
+
+Value incrementar() {
+  Value t7, contador;
+  t7 = op_add(contador, new_number(1.00));
+  contador = t7;
+  print_value(contador);
+  return new_nil();
+  return new_nil();
+}
+
+int main() {
+  Value t8, t9, t10, t11, t12, t13, t14, t15, a_5, b_6, t16, t17, t18, t19, t20, t21, x_7, x_8, i_9, t22, t23, t24, j_10, t25, t26, t27, t28, t29, t30, c_11, t31, t32;
+  print_value(new_string("--- 1. Tipos e Aritmetica ---"));
+  t8 = op_add(new_number(10.00), new_number(20.00));
+  print_value(t8);
+  t9 = op_sub(new_number(10.00), new_number(2.00));
+  print_value(t9);
+  t10 = op_mul(new_number(3.00), new_number(4.00));
+  print_value(t10);
+  t11 = op_div(new_number(10.00), new_number(2.00));
+  print_value(t11);
+  t12 = op_add(new_number(1.00), new_number(2.00));
+  t13 = op_mul(t12, new_number(3.00));
+  print_value(t13);
+  t14 = op_add(new_string("Ola "), new_string("Mundo"));
+  print_value(t14);
+  print_value(new_bool(1));
+  t15 = op_not(new_bool(1));
+  print_value(t15);
+  print_value(pop());
+  print_value(new_string("--- 2. Logica e Comparacao ---"));
+  a_5 = new_number(10.00);
+  b_6 = new_number(20.00);
+  t16 = op_lt(a_5, b_6);
+  print_value(t16);
+  t17 = op_ge(a_5, new_number(10.00));
+  print_value(t17);
+  t18 = op_eq(a_5, new_number(10.00));
+  print_value(t18);
+  t19 = op_neq(a_5, b_6);
+  print_value(t19);
+  print_value(new_string("Short-circuit OR:"));
+  t20 = op_or(new_bool(1), new_string("nao deve imprimir"));
+  print_value(t20);
+  print_value(new_string("Short-circuit AND:"));
+  t21 = op_and(new_bool(0), new_string("nao deve imprimir"));
+  print_value(t21);
+  print_value(new_string("--- 3. Escopo e Sombrento (Shadowing) ---"));
+  x_7 = new_string("global");
+  x_8 = new_string("local");
+  print_value(x_8);
+  print_value(x_7);
+  print_value(new_string("--- 4. Controle de Fluxo (If/While/For) ---"));
+  i_9 = new_number(0.00);
+  t22 = op_eq(i_9, new_number(0.00));
+  if (!is_truthy(t22)) goto L2;
+  print_value(new_string("i eh zero"));
+  goto L3;
+  L2:
+  ;
+  print_value(new_string("erro"));
+  L3:
+  ;
+  print_value(new_string("Contando while:"));
+  L4:
+  ;
+  t23 = op_lt(i_9, new_number(3.00));
+  if (!is_truthy(t23)) goto L5;
+  print_value(i_9);
+  t24 = op_add(i_9, new_number(1.00));
+  i_9 = t24;
+  goto L4;
+  L5:
+  ;
+  print_value(new_string("Contando for:"));
+  j_10 = new_number(0.00);
+  L6:
+  ;
+  t25 = op_lt(j_10, new_number(3.00));
+  if (!is_truthy(t25)) goto L7;
+  print_value(j_10);
+  t26 = op_add(j_10, new_number(1.00));
+  j_10 = t26;
+  goto L6;
+  L7:
+  ;
+  print_value(new_string("--- 5. Funcoes ---"));
+  push(new_string("Teste"));
+  t27 = saudacao();
+  push(new_number(5.00));
+  push(new_number(7.00));
+  t28 = soma();
+  print_value(t28);
+  print_value(new_string("--- 6. Recursao (Fatorial) ---"));
+  print_value(new_string("Fatorial de 5:"));
+  push(new_number(5.00));
+  t29 = fatorial();
+  print_value(t29);
+  print_value(new_string("--- 7. Closures (Contador) ---"));
+  t30 = criarContador();
+  c_11 = t30;
+  t31 = call_value(c_11);
+  t32 = call_value(c_11);
+  print_value(new_string("--- Fim dos Testes ---"));
+  return 0;
+}

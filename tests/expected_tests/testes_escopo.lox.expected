@@ -1,0 +1,45 @@
+#include "backend/c_runtime.c"
+
+Value minhaFuncao();
+Value MinhaClasse_metodo();
+Value MinhaClasse() {
+  Value inst = new_object("MinhaClasse");
+  set_attr(inst, "metodo", new_native(MinhaClasse_metodo));
+  push(inst);
+  MinhaClasse_init();
+  return inst;
+}
+
+Value minhaFuncao() {
+  Value param1_0, b_1;
+  param1_0 = pop();
+  b_1 = new_string("local_b_funcao");
+  print_value(a);
+  print_value(b_1);
+  print_value(param1_0);
+  return new_nil();
+  return new_nil();
+}
+
+Value MinhaClasse_metodo() {
+  Value this, p_metodo_2, c_3;
+  this = pop();
+  p_metodo_2 = pop();
+  c_3 = new_string("local_c_metodo");
+  print_value(c_3);
+  print_value(p_metodo_2);
+  return new_nil();
+  return new_nil();
+}
+
+int main() {
+  Value a_4, b_5, a_6, d_7;
+  a_4 = new_string("global_a");
+  b_5 = new_string("global_b");
+  a_6 = new_string("bloco_a");
+  d_7 = new_string("bloco_d");
+  print_value(a_6);
+  print_value(d_7);
+  print_value(a_4);
+  return 0;
+}

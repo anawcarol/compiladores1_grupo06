@@ -1,0 +1,58 @@
+#include "backend/c_runtime.c"
+
+Value Box_init();
+Value Box_getConteudo();
+Value Box_setConteudo();
+Value Box() {
+  Value inst = new_object("Box");
+  set_attr(inst, "init", new_native(Box_init));
+  set_attr(inst, "getConteudo", new_native(Box_getConteudo));
+  set_attr(inst, "setConteudo", new_native(Box_setConteudo));
+  push(inst);
+  Box_init();
+  return inst;
+}
+
+Value Box_init() {
+  Value this, valorInicial_0;
+  this = pop();
+  valorInicial_0 = pop();
+  set_attr(this, "conteudo", valorInicial_0);
+  return new_nil();
+  return new_nil();
+}
+
+Value Box_getConteudo() {
+  Value this, t0;
+  this = pop();
+  t0 = get_attr(this, "conteudo");
+  return t0;
+  return new_nil();
+  return new_nil();
+}
+
+Value Box_setConteudo() {
+  Value this, novoValor_1;
+  this = pop();
+  novoValor_1 = pop();
+  set_attr(this, "conteudo", novoValor_1);
+  return new_nil();
+  return new_nil();
+}
+
+int main() {
+  Value t1, caixa_2, t2, t3, t4, t5, t6;
+  push(new_number(100.00));
+  t1 = Box();
+  caixa_2 = t1;
+  t2 = get_attr(caixa_2, "getConteudo");
+  t3 = call_value(t2);
+  print_value(t3);
+  t4 = get_attr(caixa_2, "setConteudo");
+  push(new_number(200.00));
+  t5 = call_value(t4);
+  set_attr(caixa_2, "conteudo", new_number(300.00));
+  t6 = get_attr(caixa_2, "conteudo");
+  print_value(t6);
+  return 0;
+}
