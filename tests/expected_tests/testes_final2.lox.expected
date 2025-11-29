@@ -1,137 +1,22 @@
-#include "backend/c_runtime.c"
+[AVISO Semantico] Linha 68: Operacao '+' entre tipos possivelmente incompativeis: 'string' e 'int'.
 
-Value fib();
-Value Calculadora_init();
-Value Calculadora_somar();
-Value Calculadora_status();
-Value Calculadora() {
-  Value inst = new_object("Calculadora");
-  set_attr(inst, "init", new_native(Calculadora_init));
-  set_attr(inst, "somar", new_native(Calculadora_somar));
-  set_attr(inst, "status", new_native(Calculadora_status));
-  push(inst);
-  Calculadora_init();
-  return inst;
-}
-
-Value fib() {
-  Value n_0, t0, t1, t2, t3, t4, t5;
-  n_0 = pop();
-  t0 = op_le(n_0, new_number(1.00));
-  if (!is_truthy(t0)) goto L0;
-  return n_0;
-  goto L1;
-  L0:
-  ;
-  L1:
-  ;
-  t1 = op_sub(n_0, new_number(2.00));
-  push(t1);
-  t2 = fib();
-  t3 = op_sub(n_0, new_number(1.00));
-  push(t3);
-  t4 = fib();
-  t5 = op_add(t2, t4);
-  return t5;
-  return new_nil();
-  return new_nil();
-}
-
-Value Calculadora_init() {
-  Value this, fator_1;
-  this = pop();
-  fator_1 = pop();
-  set_attr(this, "fator", fator_1);
-  set_attr(this, "historico", new_number(0.00));
-  return new_nil();
-  return new_nil();
-}
-
-Value Calculadora_somar() {
-  Value this, a_2, b_3, t6, t7, t8, res_4, t9, t10;
-  this = pop();
-  a_2 = pop();
-  b_3 = pop();
-  t6 = op_add(a_2, b_3);
-  t7 = get_attr(this, "fator");
-  t8 = op_mul(t6, t7);
-  res_4 = t8;
-  t9 = get_attr(this, "historico");
-  t10 = op_add(t9, new_number(1.00));
-  set_attr(this, "historico", t10);
-  return res_4;
-  return new_nil();
-  return new_nil();
-}
-
-Value Calculadora_status() {
-  Value this, t11, t12;
-  this = pop();
-  t11 = get_attr(this, "historico");
-  t12 = op_add(new_string("Operacoes realizadas: "), t11);
-  print_value(t12);
-  return new_nil();
-  return new_nil();
-}
-
-int main() {
-  Value inicio_5, t13, resultado_6, t14, calc_7, t15, t16, soma_8, t17, t18, t19, t20, a_9, a_10, t21, t22, i_11, t23, t24, t25, x_12;
-  print_value(new_string("=== INICIO DO TESTE DE VALIDACAO ==="));
-  print_value(new_string("--- 1. Recursao (Fibonacci) ---"));
-  inicio_5 = new_number(0.00);
-  push(new_number(6.00));
-  t13 = fib();
-  resultado_6 = t13;
-  print_value(new_string("Fibonacci de 6 (Esperado: 8):"));
-  print_value(resultado_6);
-  print_value(new_string("--- 2. Classes e Objetos ---"));
-  push(new_number(2.00));
-  t14 = Calculadora();
-  calc_7 = t14;
-  t15 = get_attr(calc_7, "somar");
-  push(new_number(10.00));
-  push(new_number(20.00));
-  t16 = call_value(t15);
-  soma_8 = t16;
-  print_value(new_string("Resultado da soma (Esperado: 60):"));
-  print_value(soma_8);
-  t17 = get_attr(calc_7, "somar");
-  push(new_number(1.00));
-  push(new_number(1.00));
-  t18 = call_value(t17);
-  t19 = get_attr(calc_7, "status");
-  t20 = call_value(t19);
-  print_value(new_string("--- 3. Loops e Escopo ---"));
-  a_9 = new_string("global");
-  a_10 = new_string("bloco");
-  t21 = op_add(new_string("Dentro do bloco: "), a_10);
-  print_value(t21);
-  t22 = op_add(new_string("Fora do bloco: "), a_9);
-  print_value(t22);
-  i_11 = new_number(0.00);
-  L2:
-  ;
-  t23 = op_lt(i_11, new_number(3.00));
-  if (!is_truthy(t23)) goto L3;
-  t24 = op_add(new_string("While loop: "), i_11);
-  print_value(t24);
-  t25 = op_add(i_11, new_number(1.00));
-  i_11 = t25;
-  goto L2;
-  L3:
-  ;
-  print_value(new_string("--- 4. Tipos Dinamicos ---"));
-  x_12 = new_number(100.00);
-  print_value(x_12);
-  x_12 = new_string("Agora sou uma string");
-  print_value(x_12);
-  if (!is_truthy(x_12)) goto L4;
-  print_value(new_string("Strings sao verdadeiras (Truthy)"));
-  goto L5;
-  L4:
-  ;
-  L5:
-  ;
-  print_value(new_string("=== FIM DO TESTE ==="));
-  return 0;
-}
+[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+=== INICIO DO TESTE DE VALIDACAO ===
+--- 1. Recursao (Fibonacci) ---
+Fibonacci de 6 (Esperado: 8):
+8.00
+--- 2. Classes e Objetos ---
+Resultado da soma (Esperado: 60):
+60.00
+Operacoes realizadas: 2.00
+--- 3. Loops e Escopo ---
+Dentro do bloco: bloco
+Fora do bloco: global
+While loop: 0.00
+While loop: 1.00
+While loop: 2.00
+--- 4. Tipos Dinamicos ---
+100.00
+Agora sou uma string
+Strings sao verdadeiras (Truthy)
+=== FIM DO TESTE ===

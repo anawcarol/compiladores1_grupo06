@@ -1,127 +1,16 @@
-#include "backend/c_runtime.c"
 
-Value soma();
-Value Pessoa_init();
-Value Pessoa_saudacao();
-Value Carro_init();
-Value Carro_detalhes();
-Value Pessoa() {
-  Value inst = new_object("Pessoa");
-  set_attr(inst, "init", new_native(Pessoa_init));
-  set_attr(inst, "saudacao", new_native(Pessoa_saudacao));
-  push(inst);
-  Pessoa_init();
-  return inst;
-}
 
-Value Carro() {
-  Value inst = new_object("Carro");
-  set_attr(inst, "init", new_native(Carro_init));
-  set_attr(inst, "detalhes", new_native(Carro_detalhes));
-  push(inst);
-  Carro_init();
-  return inst;
-}
-
-Value soma() {
-  Value a_0, b_1, t0;
-  a_0 = pop();
-  b_1 = pop();
-  t0 = op_add(a_0, b_1);
-  return t0;
-  return new_nil();
-  return new_nil();
-}
-
-Value Pessoa_init() {
-  Value this, nome_2;
-  this = pop();
-  nome_2 = pop();
-  set_attr(this, "nome", nome_2);
-  return new_nil();
-  return new_nil();
-}
-
-Value Pessoa_saudacao() {
-  Value this, t1, t2, t3;
-  this = pop();
-  t1 = get_attr(this, "nome");
-  t2 = op_add(new_string("Olá, "), t1);
-  t3 = op_add(t2, new_string("!"));
-  print_value(t3);
-  return new_nil();
-  return new_nil();
-}
-
-Value Carro_init() {
-  Value this, modelo_3, cor_4;
-  this = pop();
-  modelo_3 = pop();
-  cor_4 = pop();
-  set_attr(this, "modelo", modelo_3);
-  set_attr(this, "cor", cor_4);
-  return new_nil();
-  return new_nil();
-}
-
-Value Carro_detalhes() {
-  Value this, t4, t5, t6, t7, t8;
-  this = pop();
-  t4 = get_attr(this, "modelo");
-  t5 = op_add(new_string("Modelo: "), t4);
-  t6 = op_add(t5, new_string(", Cor: "));
-  t7 = get_attr(this, "cor");
-  t8 = op_add(t6, t7);
-  print_value(t8);
-  return new_nil();
-  return new_nil();
-}
-
-int main() {
-  Value x_5, y_6, t9, p_7, t10, t11, i_8, t12, t13, j_9, t14, t15, t16, t17, carro_10, t18, t19;
-  x_5 = new_number(10.00);
-  y_6 = new_nil();
-  push(new_string("João"));
-  t9 = Pessoa();
-  p_7 = t9;
-  t10 = get_attr(p_7, "saudacao");
-  t11 = call_value(t10);
-  i_8 = new_number(0.00);
-  L0:
-  ;
-  t12 = op_lt(i_8, new_number(5.00));
-  if (!is_truthy(t12)) goto L1;
-  print_value(i_8);
-  t13 = op_add(i_8, new_number(1.00));
-  i_8 = t13;
-  goto L0;
-  L1:
-  ;
-  j_9 = new_number(0.00);
-  L2:
-  ;
-  t14 = op_lt(j_9, new_number(5.00));
-  if (!is_truthy(t14)) goto L3;
-  print_value(j_9);
-  t15 = op_add(j_9, new_number(1.00));
-  j_9 = t15;
-  goto L2;
-  L3:
-  ;
-  t16 = op_gt(x_5, new_number(5.00));
-  if (!is_truthy(t16)) goto L4;
-  print_value(new_string("x é maior que 5"));
-  goto L5;
-  L4:
-  ;
-  print_value(new_string("x não é maior que 5"));
-  L5:
-  ;
-  push(new_string("Fusca"));
-  push(new_string("Azul"));
-  t17 = Carro();
-  carro_10 = t17;
-  t18 = get_attr(carro_10, "detalhes");
-  t19 = call_value(t18);
-  return 0;
-}
+[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+OlÃ¡, JoÃ£o!
+0.00
+1.00
+2.00
+3.00
+4.00
+0.00
+1.00
+2.00
+3.00
+4.00
+x Ã© maior que 5
+Modelo: Azul, Cor: Fusca

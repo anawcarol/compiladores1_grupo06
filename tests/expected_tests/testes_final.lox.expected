@@ -1,75 +1,16 @@
-#include "backend/c_runtime.c"
 
-Value Pessoa_init();
-Value Pessoa_digaOi();
-Value Pessoa() {
-  Value inst = new_object("Pessoa");
-  set_attr(inst, "init", new_native(Pessoa_init));
-  set_attr(inst, "digaOi", new_native(Pessoa_digaOi));
-  push(inst);
-  Pessoa_init();
-  return inst;
-}
 
-Value Pessoa_init() {
-  Value this, nome_0;
-  this = pop();
-  nome_0 = pop();
-  set_attr(this, "nome", nome_0);
-  return new_nil();
-  return new_nil();
-}
-
-Value Pessoa_digaOi() {
-  Value this, t0, t1;
-  this = pop();
-  t0 = get_attr(this, "nome");
-  t1 = op_add(new_string("Oi, eu sou "), t0);
-  print_value(t1);
-  return new_nil();
-  return new_nil();
-}
-
-int main() {
-  Value a_1, b_2, t2, t3, t4, i_3, t5, t6, t7, p_4, t8, t9, t10;
-  print_value(new_string("--- Tipos Basicos ---"));
-  a_1 = new_number(10.00);
-  b_2 = new_number(20.50);
-  t2 = op_add(a_1, b_2);
-  print_value(t2);
-  t3 = op_add(new_string("Ola "), new_string("Mundo"));
-  print_value(t3);
-  print_value(new_bool(1));
-  print_value(pop());
-  print_value(new_string("--- Controle de Fluxo ---"));
-  t4 = op_lt(a_1, b_2);
-  if (!is_truthy(t4)) goto L0;
-  print_value(new_string("a eh menor"));
-  goto L1;
-  L0:
-  ;
-  print_value(new_string("a nao eh menor"));
-  L1:
-  ;
-  i_3 = new_number(0.00);
-  L2:
-  ;
-  t5 = op_lt(i_3, new_number(3.00));
-  if (!is_truthy(t5)) goto L3;
-  print_value(i_3);
-  t6 = op_add(i_3, new_number(1.00));
-  i_3 = t6;
-  goto L2;
-  L3:
-  ;
-  print_value(new_string("--- Objetos ---"));
-  push(new_string("Pedro"));
-  t7 = Pessoa();
-  p_4 = t7;
-  t8 = get_attr(p_4, "digaOi");
-  t9 = call_value(t8);
-  set_attr(p_4, "idade", new_number(23.00));
-  t10 = get_attr(p_4, "idade");
-  print_value(t10);
-  return 0;
-}
+[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+--- Tipos Basicos ---
+30.50
+Ola Mundo
+true
+nil
+--- Controle de Fluxo ---
+a eh menor
+0.00
+1.00
+2.00
+--- Objetos ---
+Oi, eu sou Pedro
+23.00

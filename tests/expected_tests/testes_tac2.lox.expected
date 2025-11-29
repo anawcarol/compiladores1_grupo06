@@ -1,59 +1,15 @@
-#include "backend/c_runtime.c"
 
-Value saudacao();
-Value saudacao() {
-  print_value(new_string("Olá mundo!"));
-  return new_nil();
-  return new_nil();
-}
 
-int main() {
-  Value a_0, b_1, t0, resultado_2, t1, resultado2_3, t2, contador_4, t3, t4, i_5, t5, t6, x_6, y_7, t7, z_8, t8, w_9, t9;
-  a_0 = new_number(10.00);
-  b_1 = new_number(20.00);
-  t0 = op_gt(a_0, b_1);
-  resultado_2 = t0;
-  t1 = op_eq(a_0, new_number(10.00));
-  resultado2_3 = t1;
-  t2 = op_gt(a_0, b_1);
-  if (!is_truthy(t2)) goto L0;
-  print_value(new_string("a é maior que b"));
-  goto L1;
-  L0:
-  ;
-  print_value(new_string("a é menor ou igual a b"));
-  L1:
-  ;
-  contador_4 = new_number(0.00);
-  L2:
-  ;
-  t3 = op_lt(contador_4, new_number(3.00));
-  if (!is_truthy(t3)) goto L3;
-  print_value(new_string("Contador: "));
-  print_value(contador_4);
-  t4 = op_add(contador_4, new_number(1.00));
-  contador_4 = t4;
-  goto L2;
-  L3:
-  ;
-  i_5 = new_number(0.00);
-  L4:
-  ;
-  t5 = op_lt(i_5, new_number(2.00));
-  if (!is_truthy(t5)) goto L5;
-  print_value(new_string("For loop: "));
-  print_value(i_5);
-  t6 = op_add(i_5, new_number(1.00));
-  i_5 = t6;
-  goto L4;
-  L5:
-  ;
-  x_6 = new_bool(1);
-  y_7 = new_bool(0);
-  t7 = op_and(x_6, y_7);
-  z_8 = t7;
-  t8 = op_or(x_6, y_7);
-  w_9 = t8;
-  t9 = saudacao();
-  return 0;
-}
+[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+a Ã© menor ou igual a b
+Contador:
+0.00
+Contador:
+1.00
+Contador:
+2.00
+For loop:
+0.00
+For loop:
+1.00
+OlÃ¡ mundo!

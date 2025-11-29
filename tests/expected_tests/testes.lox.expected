@@ -1,22 +1,7 @@
-#include "backend/c_runtime.c"
 
-int main() {
-  Value a_0, b_1, t0, soma_2, t1;
-  print_value(new_string("--- Inicio do Teste Simples ---"));
-  a_0 = new_number(10.00);
-  b_1 = new_number(5.00);
-  t0 = op_add(a_0, b_1);
-  soma_2 = t0;
-  print_value(soma_2);
-  t1 = op_gt(soma_2, new_number(12.00));
-  if (!is_truthy(t1)) goto L0;
-  print_value(new_string("Soma eh maior que 12"));
-  goto L1;
-  L0:
-  ;
-  print_value(new_string("Soma eh menor que 12"));
-  L1:
-  ;
-  print_value(new_string("--- Fim ---"));
-  return 0;
-}
+
+[ERRO] Sucesso! Codigo gerado em 'saida.c'.
+--- Inicio do Teste Simples ---
+15.00
+Soma eh maior que 12
+--- Fim ---

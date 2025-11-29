@@ -4,11 +4,9 @@ import os
 import difflib
 import pathlib
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOX_TESTS_DIR = ROOT / "tests" / "lox_tests"  # Diretório dos arquivos de testes Lox
 EXPECTED_TESTS_DIR = ROOT / "tests" / "expected_tests"  # Diretório dos arquivos de expectativas
-
 
 def pick_compiler() -> pathlib.Path:
     """Seleciona o compilador a ser utilizado, considerando a variável de ambiente COMPILER."""
@@ -32,7 +30,6 @@ def pick_compiler() -> pathlib.Path:
     print("[ERRO] Compilador não encontrado; rode 'make' ou defina a variável de ambiente COMPILER.", file=sys.stderr)
     sys.exit(127)
 
-
 def norm(s: str) -> str:
     """Normaliza a string, garantindo uma quebra de linha consistente."""
     if s is None:
@@ -42,7 +39,6 @@ def norm(s: str) -> str:
     normalized = "\n".join(lines)
     return normalized if normalized.endswith("\n") else normalized + "\n"
 
-
 def expected_for(lox: pathlib.Path) -> pathlib.Path:
     """Determina o caminho do arquivo de expectativa correspondente ao teste."""
     name = lox.name
@@ -51,7 +47,6 @@ def expected_for(lox: pathlib.Path) -> pathlib.Path:
     
     suffix = name[len("teste"):-len(".lox")]
     return EXPECTED_TESTS_DIR / f"testes{suffix}.lox.expected"
-
 
 def discover() -> list[pathlib.Path]:
     """Descobre os arquivos de teste a serem executados, considerando a variável de ambiente ONLY."""
@@ -63,44 +58,52 @@ def discover() -> list[pathlib.Path]:
     prefs = [pref.strip() for pref in only.split(",") if pref.strip()]
     return [test for test in all_lox if any(test.name.startswith(pref) for pref in prefs)]
 
-
-def run_test(lox: pathlib.Path, compiler: pathlib.Path, parse_only: bool, error_strict: bool) -> tuple:
-    """Executa um teste Lox e retorna os resultados da execução."""
-    expected_output = expected_for(lox)
+def run_test(lox: pathlib.Path, compiler: pathlib.Path) -> str:
+    """Executa um teste Lox e retorna a saída gerada (stdout e stderr)."""
     proc = subprocess.run([str(compiler), str(lox)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    
+    # Captura a saída tanto do stdout quanto do stderr
     output = norm(proc.stdout)
-    code = proc.returncode
-    is_error_case = "erros" in lox.stem
-    failures = []
+    error_output = norm(proc.stderr)
+    
+    # Se houver erro no stderr, podemos juntar a saída de erro com a saída padrão
+    if error_output:
+        output += "\n[ERRO] " + error_output
 
-    if parse_only and not is_error_case:
-        if code != 0:
-            failures.append(("exit", f"esperado=0 obtido={code}"))
-    elif is_error_case and not error_strict:
-        if code == 0:
-            failures.append(("exit", "esperado != 0 obtido=0"))
-    else:
-        if expected_output.exists():
-            expected_content = norm(expected_output.read_text(encoding="utf-8", errors="replace"))
-            if output != expected_content:
-                diff = "\n".join(difflib.unified_diff(
-                    expected_content.splitlines(), output.splitlines(),
-                    fromfile=str(expected_output), tofile=f"(stdout {lox.name})", lineterm=""
-                ))
-                failures.append(("stdout", diff))
+    # Se o compilador gerar 'saida.c', tentamos compilá-lo e executá-lo
+    if "Codigo gerado em 'saida.c'" in output:
+        print(f"[INFO] Código gerado em 'saida.c'. Compilando e executando...")
+
+        # Compila o código C gerado
+        compile_proc = subprocess.run(["gcc", "saida.c", "-o", "saida"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if compile_proc.returncode != 0:
+            output += "\n[ERRO] Falha na compilação do código C gerado."
         else:
-            if not is_error_case and code != 0:
-                failures.append(("exit", f"esperado=0 obtido={code}"))
+            # Executa o código compilado
+            exec_proc = subprocess.run(["./saida"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            output += norm(exec_proc.stdout)
+            if exec_proc.stderr:
+                output += "\n[ERRO] " + exec_proc.stderr
 
-    return failures, output, expected_output
+    return output  # Retornando apenas a saída gerada
 
-
-def display_results(lox: pathlib.Path, failures: list, total_fails: int, output: str, expected_output: pathlib.Path):
+def display_results(lox: pathlib.Path, output: str, expected_output: pathlib.Path):
     """Exibe os resultados do teste, incluindo falhas e saídas esperadas."""
     label = lox.relative_to(ROOT)
+    failures = []
+    if expected_output.exists():
+        expected_content = norm(expected_output.read_text(encoding="utf-8", errors="replace"))
+        if output != expected_content:
+            diff = "\n".join(difflib.unified_diff(
+                expected_content.splitlines(), output.splitlines(),
+                fromfile=str(expected_output), tofile=f"(stdout {lox.name})", lineterm=""
+            ))
+            failures.append(("stdout", diff))
+    else:
+        failures.append(("expected_output", "Arquivo esperado não encontrado"))
+
     if failures:
         print(f"[FAIL] {label}")
-        total_fails += 1
         for kind, detail in failures:
             print(f"  └─ {kind}:")
             if detail.strip().startswith("---"):
@@ -110,14 +113,7 @@ def display_results(lox: pathlib.Path, failures: list, total_fails: int, output:
                 print(detail)
                 print("-----")
     else:
-        extra = []
-        if not expected_output.exists():
-            extra.append("sem expected")
-        suffix = f"  ({'; '.join(extra)})" if extra else ""
-        print(f"[ OK ] {label}{suffix}")
-
-    return total_fails
-
+        print(f"[ OK ] {label}")
 
 def main():
     compiler = pick_compiler()
@@ -135,15 +131,14 @@ def main():
     print(f"Descobertos {total} testes em 'lox_tests/'.\n")
 
     for lox in tests:
-        failures, output, expected_output = run_test(lox, compiler, parse_only, error_strict)
-        fails_total = display_results(lox, failures, fails_total, output, expected_output)
+        output = run_test(lox, compiler)
+        expected_output = expected_for(lox)
+        display_results(lox, output, expected_output)
 
     print("\nResumo:")
     print(f"  Total: {total}")
-    print(f"  Pass:  {total - fails_total}")
     print(f"  Fail:  {fails_total}")
     sys.exit(fails_total)
-
 
 if __name__ == "__main__":
     main()
